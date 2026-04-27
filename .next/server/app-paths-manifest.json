@@ -1,0 +1,9 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/order/page": "app/order/page.js",
+  "/risol-admin-2024/page": "app/risol-admin-2024/page.js",
+  "/risol-admin-2024/login/page": "app/risol-admin-2024/login/page.js",
+  "/afiliasi/dashboard/page": "app/afiliasi/dashboard/page.js",
+  "/afiliasi/page": "app/afiliasi/page.js",
+  "/page": "app/page.js"
+}

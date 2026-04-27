@@ -1,0 +1,194 @@
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import ConfettiEffect from "@/components/ConfettiEffect";
+import { getAffiliate } from "@/lib/storage";
+import { buildRewardClaimLink } from "@/lib/whatsapp";
+
+export default function AfiliasiPage() {
+    const [code, setCode] = useState("");
+    const [result, setResult] = useState<{
+        ownerName: string;
+        count: number;
+        rewardClaimed: boolean;
+    } | null>(null);
+    const [notFound, setNotFound] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
+
+    const handleCheck = () => {
+        const trimmed = code.trim().toUpperCase();
+        if (!trimmed) return;
+        const aff = getAffiliate(trimmed);
+        if (!aff) {
+            setNotFound(true);
+            setResult(null);
+            setShowConfetti(false);
+            return;
+        }
+        setNotFound(false);
+        const count = aff.usedBy.length;
+        setResult({ ownerName: aff.ownerName, count, rewardClaimed: aff.rewardClaimed });
+        setShowConfetti(count >= 5);
+    };
+
+    const pct = result ? Math.min((result.count / 5) * 100, 100) : 0;
+    const waLink = result ? buildRewardClaimLink(result.ownerName, code.toUpperCase()) : "#";
+
+    return (
+        <div className="min-h-screen bg-cream">
+            <Navbar />
+            {showConfetti && <ConfettiEffect />}
+
+            <div className="max-w-xl mx-auto px-4 sm:px-6 py-12">
+                {/* Banner Dashboard */}
+                <div className="mb-6 bg-primary/10 border border-primary/20 rounded-2xl p-4 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-bold text-primary">Sudah punya kode?</p>
+                        <p className="text-xs text-gray-600">Masuk ke dashboard untuk pantau penjualan</p>
+                    </div>
+                    <Link href="/afiliasi/login" className="bg-primary text-white text-xs font-black py-2 px-4 rounded-xl hover:bg-primary-dark transition-colors">
+                        Login Dashboard →
+                    </Link>
+                </div>
+
+                <div className="text-center mb-10">
+                    <h1 className="text-3xl sm:text-4xl font-black text-gray-800 mb-2">Program Afiliasi 🎁</h1>
+                    <p className="text-gray-600">
+                        Ajak 5 teman beli isi 3 pakai kodemu dan dapat <strong>3 risol gratis!</strong>
+                    </p>
+                </div>
+
+                {/* Input */}
+                <div className="card p-6 mb-6">
+                    <label htmlFor="afil-code" className="label">Cek Cepat Progress</label>
+                    <div className="flex gap-3 mt-1">
+                        <input
+                            id="afil-code"
+                            type="text"
+                            className="input-field uppercase tracking-widest flex-1"
+                            placeholder="Contoh: AB1234"
+                            maxLength={6}
+                            value={code}
+                            onChange={(e) => {
+                                setCode(e.target.value.toUpperCase());
+                                setResult(null);
+                                setNotFound(false);
+                            }}
+                            onKeyDown={(e) => e.key === "Enter" && handleCheck()}
+                        />
+                        <button
+                            id="check-afil-btn"
+                            onClick={handleCheck}
+                            className="btn-primary px-6 whitespace-nowrap"
+                        >
+                            Cek Progress
+                        </button>
+                    </div>
+                    {notFound && (
+                        <p className="text-red-500 text-sm mt-3 font-medium">❌ Kode tidak ditemukan. Pastikan kamu sudah beli isi 3!</p>
+                    )}
+                </div>
+
+                {/* Result */}
+                {result && (
+                    <div className="card p-6 animate-fade-in">
+                        {/* Congrats or progress */}
+                        {result.count >= 5 ? (
+                            <div className="text-center mb-6">
+                                <div className="text-6xl mb-3">🎉</div>
+                                <h2 className="text-2xl font-black text-primary mb-2">Selamat, {result.ownerName}!</h2>
+                                <p className="text-gray-700 font-medium">
+                                    Kamu berhasil mengajak 5 teman! Hubungi admin untuk klaim hadiahmu 🎁
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="mb-6">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h2 className="text-lg font-black text-gray-800">Halo, {result.ownerName}! 👋</h2>
+                                    <span className="text-2xl font-black text-primary">{result.count}/5</span>
+                                </div>
+                                <p className="text-gray-600 text-sm mb-4">
+                                    {result.count} dari 5 teman sudah order pakai kodemu!
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Progress bar */}
+                        <div className="mb-4">
+                            <div className="w-full bg-gray-100 rounded-full h-5 overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-primary to-primary-dark rounded-full transition-all duration-700"
+                                    style={{ width: `${pct}%` }}
+                                />
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-500 mt-1 px-1">
+                                <span>0</span>
+                                <span>5 teman</span>
+                            </div>
+                        </div>
+
+                        {/* Motivasi */}
+                        <div className={`rounded-2xl p-4 text-center ${result.count >= 5 ? "bg-primary/10" : "bg-yellow-50"}`}>
+                            {result.count >= 5 ? (
+                                <>
+                                    <p className="font-bold text-primary">
+                                        ✨ Reward kamu sudah siap diklaim!
+                                    </p>
+                                    {result.rewardClaimed && (
+                                        <p className="text-xs text-gray-500 mt-1">Reward sudah diklaim</p>
+                                    )}
+                                </>
+                            ) : (
+                                <p className="font-bold text-yellow-700">
+                                    🔥 Tinggal {5 - result.count} orang lagi, kamu dapat 3 risol gratis!
+                                </p>
+                            )}
+                        </div>
+
+                        {/* CTA klaim reward */}
+                        {result.count >= 5 && !result.rewardClaimed && (
+                            <a
+                                id="claim-reward-btn"
+                                href={waLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-primary flex items-center justify-center gap-2 w-full mt-5"
+                            >
+                                💬 Klaim Reward via WhatsApp
+                            </a>
+                        )}
+                    </div>
+                )}
+
+                {/* Explanation */}
+                <div className="mt-8 card p-6 bg-primary/5 border border-primary/20">
+                    <h3 className="font-black text-gray-800 mb-3">📌 Cara Kerja Afiliasi</h3>
+                    <ol className="space-y-2 text-sm text-gray-700">
+                        <li className="flex gap-2">
+                            <span className="text-primary font-bold">1.</span>
+                            <span>Beli risol <strong>isi 3</strong> dan kamu dapat kode afiliasi unik</span>
+                        </li>
+                        <li className="flex gap-2">
+                            <span className="text-primary font-bold">2.</span>
+                            <span>Bagikan kodemu ke teman-teman</span>
+                        </li>
+                        <li className="flex gap-2">
+                            <span className="text-primary font-bold">3.</span>
+                            <span>Teman input kodemu saat order <strong>isi 3</strong></span>
+                        </li>
+                        <li className="flex gap-2">
+                            <span className="text-primary font-bold">4.</span>
+                            <span>Jika 5 teman berbeda pakai kodemu, kamu dapat <strong>3 risol gratis!</strong></span>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            {/* Footer */}
+            <footer className="bg-gray-800 text-white py-6 px-4 text-center mt-8">
+                <p className="text-gray-400 text-sm">🫓 Risol Lumer — &ldquo;Lumer di mulut, awet di hati&rdquo;</p>
+            </footer>
+        </div>
+    );
+}
