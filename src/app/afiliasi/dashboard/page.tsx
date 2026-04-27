@@ -1,4 +1,5 @@
 "use client";
+export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -14,8 +15,10 @@ export default function AffiliateDashboard() {
     const [afilCode, setAfilCode] = useState<string | null>(null);
     const [afilData, setAfilData] = useState<any>(null);
     const [referralOrders, setReferralOrders] = useState<any[]>([]);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         const session = getAfilSession();
         if (!session) {
             router.push("/afiliasi/login");
@@ -36,7 +39,7 @@ export default function AffiliateDashboard() {
         router.push("/afiliasi/login");
     };
 
-    if (!afilCode || !afilData) return null;
+    if (!mounted || !afilCode || !afilData) return null;
 
     const count = afilData.usedBy.length;
     const pct = Math.min((count / 5) * 100, 100);
@@ -150,7 +153,7 @@ export default function AffiliateDashboard() {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <span className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase ${order.status === "Selesai" ? "bg-green-100 text-green-700" :
-                                                                order.status === "Diproses" ? "bg-blue-100 text-blue-700" : "bg-yellow-100 text-yellow-700"
+                                                            order.status === "Diproses" ? "bg-blue-100 text-blue-700" : "bg-yellow-100 text-yellow-700"
                                                             }`}>
                                                             {order.status}
                                                         </span>
