@@ -4,30 +4,32 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Product {
-  id        String   @id @default(cuid())
-  slug      String   @unique // machine name like 'matcha', 'original'
+  id        String      @id @default(cuid())
+  slug      String      @unique
   name      String
   emoji     String
   color     String
   price1    Int
   price3    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   orders    OrderItem[]
 }
 
 model Order {
   id            String      @id @default(cuid())
-  code          String      @unique // readable code like RL-1234
+  code          String      @unique
   name          String
   whatsapp      String
-  type          String      // 'ambil' or 'antar'
+  type          String
   kelas         String?
   total         Int
-  status        String      @default("Baru") // 'Baru', 'Diproses', 'Selesai', 'Dibatalkan'
+  status        String      @default("Baru")
   referralCode  String?
   affiliateCode String?
   createdAt     DateTime    @default(now())
@@ -38,11 +40,11 @@ model Order {
 model OrderItem {
   id        String  @id @default(cuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId String
-  product   Product @relation(fields: [productId], references: [id])
   qty       Int
-  packaging String  // '1pcs' or 'isi3'
+  packaging String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Affiliate {
@@ -50,7 +52,7 @@ model Affiliate {
   code          String   @unique
   ownerName     String
   ownerWA       String
-  usedBy        String[] @default([]) // Array of buyer WA numbers
+  usedBy        String[] @default([])
   rewardClaimed Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -59,7 +61,7 @@ model Affiliate {
 model Notification {
   id        String   @id @default(cuid())
   message   String
-  type      String   @default("info") // 'success', 'error', 'warning', 'info'
+  type      String   @default("info")
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }

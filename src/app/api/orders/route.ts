@@ -23,8 +23,9 @@ export async function POST(req: Request) {
         const data = await req.json();
         const { code, name, whatsapp, type, kelas, items, referralCode, affiliateCode, total } = data;
 
-        // Upsert products first (optional, but ensures they exist for relations)
-        // In a real app, products would be managed separately.
+        // Resolve product slugs to IDs if they aren't already CUIDs
+        const products = await prisma.product.findMany();
+        const productSlugMap = new Map(products.map(p => [p.slug, p.id]));
 
         const order = await prisma.order.create({
             data: {
@@ -38,11 +39,15 @@ export async function POST(req: Request) {
                 affiliateCode,
                 status: "Baru",
                 items: {
-                    create: items.map((item: any) => ({
-                        productId: item.productId, // Assuming this matches slug/id in DB
-                        qty: item.qty,
-                        packaging: item.packaging,
-                    })),
+                    create: items.map((item: any) => {
+                        // Use either the resolved ID from slug, or the original productId if it's already an ID
+                        const resolvedId = productSlugMap.get(item.productId) || item.productId;
+                        return {
+                            productId: resolvedId,
+                            qty: item.qty,
+                            packaging: item.packaging,
+                        };
+                    }),
                 },
             },
             include: {

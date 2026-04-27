@@ -149,6 +149,22 @@ export default function AdminPage() {
     const todayAmbil = orders.filter((o) => o.type === "ambil").length;
     const todayAntar = orders.filter((o) => o.type === "antar").length;
 
+    // Detailed Stats
+    const totalIsi3 = orders.reduce((acc, order) => {
+        return acc + order.items
+            .filter(item => item.packaging === 'isi3')
+            .reduce((sum, item) => sum + (item.qty || 0), 0);
+    }, 0);
+
+    const total1pcs = orders.reduce((acc, order) => {
+        return acc + order.items
+            .filter(item => item.packaging === '1pcs')
+            .reduce((sum, item) => sum + (item.qty || 0), 0);
+    }, 0);
+
+    const revenueIsi3 = totalIsi3 * 10000;
+    const revenue1pcs = total1pcs * 5000;
+
     // Filtered orders
     const filtered = orders.filter((o) => {
         const statusMatch = filterStatus === "semua" || o.status === filterStatus;
@@ -232,8 +248,8 @@ export default function AdminPage() {
                         {/* === STATS CARDS === */}
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                             {[
-                                { label: "Total Pesanan Hari Ini", value: todayTotal, icon: "📦", color: "bg-blue-50 border-blue-200" },
-                                { label: "Total Pemasukan", value: `Rp${todayRevenue.toLocaleString("id-ID")}`, icon: "💰", color: "bg-green-50 border-green-200" },
+                                { label: "Pemasukan Hari Ini", value: `Rp${todayRevenue.toLocaleString("id-ID")}`, icon: "💰", color: "bg-green-50 border-green-200" },
+                                { label: "Total Pesanan", value: todayTotal, icon: "📦", color: "bg-blue-50 border-blue-200" },
                                 { label: "Ambil Sendiri", value: todayAmbil, icon: "🏪", color: "bg-yellow-50 border-yellow-200" },
                                 { label: "Diantar", value: todayAntar, icon: "🛵", color: "bg-purple-50 border-purple-200" },
                             ].map((card, i) => (
@@ -243,6 +259,32 @@ export default function AdminPage() {
                                     <p className="text-sm text-gray-600 font-medium mt-1">{card.label}</p>
                                 </div>
                             ))}
+                        </div>
+
+                        {/* === PRODUCT BREAKDOWN === */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+                            <div className="bg-white rounded-2xl border-2 border-orange-100 p-6 shadow-sm flex items-center gap-6">
+                                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl">🍱</div>
+                                <div className="flex-1">
+                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Risol Isi 3 (10rb)</h3>
+                                    <div className="flex items-baseline gap-2 mt-1">
+                                        <span className="text-3xl font-black text-gray-800">{totalIsi3}</span>
+                                        <span className="text-gray-400 font-bold">Porsi</span>
+                                    </div>
+                                    <p className="text-orange-600 font-bold mt-1">Total: Rp{revenueIsi3.toLocaleString("id-ID")}</p>
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-2xl border-2 border-blue-100 p-6 shadow-sm flex items-center gap-6">
+                                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl">🥟</div>
+                                <div className="flex-1">
+                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Risol 1 Pcs (5rb)</h3>
+                                    <div className="flex items-baseline gap-2 mt-1">
+                                        <span className="text-3xl font-black text-gray-800">{total1pcs}</span>
+                                        <span className="text-gray-400 font-bold">Pcs</span>
+                                    </div>
+                                    <p className="text-blue-600 font-bold mt-1">Total: Rp{revenue1pcs.toLocaleString("id-ID")}</p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* === FILTERS & EXPORT === */}

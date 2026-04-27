@@ -82,8 +82,12 @@ export async function updateOrderStatus(code: string, status: OrderStatus): Prom
 
 export async function getTodayOrders(): Promise<Order[]> {
     const orders = await getOrders();
-    const today = new Date().toISOString().slice(0, 10);
-    return orders.filter((o) => o.createdAt.toString().startsWith(today));
+    // Using local date string (YYYY-MM-DD) for more accurate "today" filtering in user's timezone
+    const today = new Date().toLocaleDateString('en-CA');
+    return orders.filter((o) => {
+        const orderDate = new Date(o.createdAt).toLocaleDateString('en-CA');
+        return orderDate === today;
+    });
 }
 
 // ===================== AFFILIATES =====================
