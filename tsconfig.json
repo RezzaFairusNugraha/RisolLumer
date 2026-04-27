@@ -35,6 +35,9 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "test-mix-promo.ts",
+    "test-order.ts",
+    "debug-db.ts"
   ]
 }

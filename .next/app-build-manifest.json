@@ -12,7 +12,7 @@
       "static/chunks/4bd1b696-c023c6e3521b1417.js",
       "static/chunks/255-4f212684648fcab9.js",
       "static/chunks/main-app-4f0cd5ff4781207d.js",
-      "static/css/476c4f6a3a784805.css",
+      "static/css/4a9d6a0f2a0e7621.css",
       "static/chunks/825-bd85d44cf386ca2e.js",
       "static/chunks/app/layout-7593017d10db5b56.js"
     ],
@@ -44,20 +44,13 @@
       "static/chunks/main-app-4f0cd5ff4781207d.js",
       "static/chunks/app/api/products/seed/route-f990ec29fe47efb0.js"
     ],
-    "/afiliasi/login/page": [
-      "static/chunks/webpack-2eb758dea75faf50.js",
-      "static/chunks/4bd1b696-c023c6e3521b1417.js",
-      "static/chunks/255-4f212684648fcab9.js",
-      "static/chunks/main-app-4f0cd5ff4781207d.js",
-      "static/chunks/app/afiliasi/login/page-7e27b923f61eb1b5.js"
-    ],
     "/page": [
       "static/chunks/webpack-2eb758dea75faf50.js",
       "static/chunks/4bd1b696-c023c6e3521b1417.js",
       "static/chunks/255-4f212684648fcab9.js",
       "static/chunks/main-app-4f0cd5ff4781207d.js",
       "static/chunks/176-dbfe7d379a5d476e.js",
-      "static/chunks/239-0efcf3b33fe933aa.js",
+      "static/chunks/239-634a9d2e28684992.js",
       "static/chunks/app/page-935829e3b41cb955.js"
     ],
     "/risol-admin-2024/login/page": [
@@ -67,6 +60,13 @@
       "static/chunks/main-app-4f0cd5ff4781207d.js",
       "static/chunks/app/risol-admin-2024/login/page-99561180b2d9fdd6.js"
     ],
+    "/afiliasi/login/page": [
+      "static/chunks/webpack-2eb758dea75faf50.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-4f212684648fcab9.js",
+      "static/chunks/main-app-4f0cd5ff4781207d.js",
+      "static/chunks/app/afiliasi/login/page-8d901b1ceec0a197.js"
+    ],
     "/afiliasi/page": [
       "static/chunks/webpack-2eb758dea75faf50.js",
       "static/chunks/4bd1b696-c023c6e3521b1417.js",
@@ -74,7 +74,7 @@
       "static/chunks/main-app-4f0cd5ff4781207d.js",
       "static/chunks/176-dbfe7d379a5d476e.js",
       "static/chunks/708-1fc7a6d1d5b4aee7.js",
-      "static/chunks/app/afiliasi/page-8fad3733d04eef8a.js"
+      "static/chunks/app/afiliasi/page-877a4fe574d90920.js"
     ],
     "/afiliasi/dashboard/page": [
       "static/chunks/webpack-2eb758dea75faf50.js",
@@ -83,15 +83,7 @@
       "static/chunks/main-app-4f0cd5ff4781207d.js",
       "static/chunks/176-dbfe7d379a5d476e.js",
       "static/chunks/708-1fc7a6d1d5b4aee7.js",
-      "static/chunks/app/afiliasi/dashboard/page-b1966edfe291c5a6.js"
-    ],
-    "/risol-admin-2024/page": [
-      "static/chunks/webpack-2eb758dea75faf50.js",
-      "static/chunks/4bd1b696-c023c6e3521b1417.js",
-      "static/chunks/255-4f212684648fcab9.js",
-      "static/chunks/main-app-4f0cd5ff4781207d.js",
-      "static/chunks/825-bd85d44cf386ca2e.js",
-      "static/chunks/app/risol-admin-2024/page-8e4527f86b339e11.js"
+      "static/chunks/app/afiliasi/dashboard/page-5c3a6a146bc29532.js"
     ],
     "/order/page": [
       "static/chunks/webpack-2eb758dea75faf50.js",
@@ -99,8 +91,16 @@
       "static/chunks/255-4f212684648fcab9.js",
       "static/chunks/main-app-4f0cd5ff4781207d.js",
       "static/chunks/176-dbfe7d379a5d476e.js",
-      "static/chunks/239-0efcf3b33fe933aa.js",
-      "static/chunks/app/order/page-475efa51d77d62f8.js"
+      "static/chunks/239-634a9d2e28684992.js",
+      "static/chunks/app/order/page-0b245828ae5cbb93.js"
+    ],
+    "/risol-admin-2024/page": [
+      "static/chunks/webpack-2eb758dea75faf50.js",
+      "static/chunks/4bd1b696-c023c6e3521b1417.js",
+      "static/chunks/255-4f212684648fcab9.js",
+      "static/chunks/main-app-4f0cd5ff4781207d.js",
+      "static/chunks/825-bd85d44cf386ca2e.js",
+      "static/chunks/app/risol-admin-2024/page-7aa6ac538217317c.js"
     ]
   }
 }

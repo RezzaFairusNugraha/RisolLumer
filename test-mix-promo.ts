@@ -58,7 +58,7 @@ async function testMixPromo() {
             },
         });
         console.log(`\nCreated real order in DB: ${order.code} | Total: ${order.total}`);
-    } catch (e) {
+    } catch (e: any) {
         console.error("\nFailed to create DB order (expected in local environment):", e.message);
     }
 }

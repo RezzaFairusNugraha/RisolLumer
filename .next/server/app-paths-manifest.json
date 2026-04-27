@@ -4,11 +4,11 @@
   "/api/orders/[code]/route": "app/api/orders/[code]/route.js",
   "/api/orders/route": "app/api/orders/route.js",
   "/api/products/seed/route": "app/api/products/seed/route.js",
-  "/afiliasi/login/page": "app/afiliasi/login/page.js",
   "/page": "app/page.js",
   "/risol-admin-2024/login/page": "app/risol-admin-2024/login/page.js",
+  "/afiliasi/login/page": "app/afiliasi/login/page.js",
   "/afiliasi/page": "app/afiliasi/page.js",
   "/afiliasi/dashboard/page": "app/afiliasi/dashboard/page.js",
-  "/risol-admin-2024/page": "app/risol-admin-2024/page.js",
-  "/order/page": "app/order/page.js"
+  "/order/page": "app/order/page.js",
+  "/risol-admin-2024/page": "app/risol-admin-2024/page.js"
 }
