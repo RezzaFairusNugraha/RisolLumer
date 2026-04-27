@@ -71,7 +71,7 @@ export default function AdminPage() {
     const [filterType, setFilterType] = useState<FilterType>("semua");
     const [toastMsg, setToastMsg] = useState<string | null>(null);
     const [highlightCode, setHighlightCode] = useState<string | null>(null);
-    const highlightTimer = useRef<NodeJS.Timeout>(null);
+    const highlightTimer = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         if (!isAdminLoggedIn()) {
