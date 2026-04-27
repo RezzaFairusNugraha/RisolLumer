@@ -55,10 +55,21 @@ function formatItemDetail(order: Order): string {
     return order.items
         .map((item) => {
             const prod = PRODUCTS.find((p) => p.id === item.productId);
-            return `${prod?.emoji ?? ""} ${prod?.name ?? item.productId} ${item.packaging === "isi3" ? "(isi3)" : ""
-                } ×${item.qty}`;
+            // Calculate bundles for this item
+            const bundles = Math.floor(item.qty / 3);
+            const satuan = item.qty % 3;
+
+            let detail = `${prod?.emoji ?? ""} ${prod?.name ?? item.productId}`;
+            if (bundles > 0 && satuan > 0) {
+                detail += ` [${bundles} pkt + ${satuan} pcs]`;
+            } else if (bundles > 0) {
+                detail += ` [${bundles} pkt]`;
+            } else {
+                detail += ` [${item.qty} pcs]`;
+            }
+            return detail;
         })
-        .join(", ");
+        .join("\n");
 }
 
 export default function AdminPage() {
@@ -149,16 +160,23 @@ export default function AdminPage() {
     const todayAmbil = orders.filter((o) => o.type === "ambil").length;
     const todayAntar = orders.filter((o) => o.type === "antar").length;
 
-    // Detailed Stats (Mix & Match Logic)
-    const totalQty = orders.reduce((acc, order) => {
-        return acc + order.items.reduce((sum, item) => sum + (item.qty || 0), 0);
-    }, 0);
+    // Detailed Stats (Product Breakdown)
+    const productStats = PRODUCTS.map(p => {
+        const qty = orders.reduce((sum, o) => {
+            const item = o.items.find(i => i.productId === p.id);
+            return sum + (item?.qty || 0);
+        }, 0);
+        const bundles = Math.floor(qty / 3);
+        const satuan = qty % 3;
+        return {
+            ...p,
+            totalQty: qty,
+            bundles,
+            satuan
+        };
+    }).filter(s => s.totalQty > 0);
 
-    const totalBundles = Math.floor(totalQty / 3);
-    const totalSatuan = totalQty % 3;
-
-    const revenueBundles = totalBundles * 10000;
-    const revenueSatuan = totalSatuan * 5000;
+    const totalQtySold = productStats.reduce((s, p) => s + p.totalQty, 0);
 
     // Filtered orders
     const filtered = orders.filter((o) => {
@@ -257,28 +275,37 @@ export default function AdminPage() {
                         </div>
 
                         {/* === PRODUCT BREAKDOWN === */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                            <div className="bg-white rounded-2xl border-2 border-orange-100 p-6 shadow-sm flex items-center gap-6">
-                                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl">🎁</div>
-                                <div className="flex-1">
-                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Paket 3 (Mix)</h3>
-                                    <div className="flex items-baseline gap-2 mt-1">
-                                        <span className="text-3xl font-black text-gray-800">{totalBundles}</span>
-                                        <span className="text-gray-400 font-bold">Paket</span>
-                                    </div>
-                                    <p className="text-orange-600 font-bold mt-1">Estimasi: Rp{revenueBundles.toLocaleString("id-ID")}</p>
-                                </div>
-                            </div>
-                            <div className="bg-white rounded-2xl border-2 border-blue-100 p-6 shadow-sm flex items-center gap-6">
-                                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl">🥟</div>
-                                <div className="flex-1">
-                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Satuan</h3>
-                                    <div className="flex items-baseline gap-2 mt-1">
-                                        <span className="text-3xl font-black text-gray-800">{totalSatuan}</span>
-                                        <span className="text-gray-400 font-bold">Pcs</span>
-                                    </div>
-                                    <p className="text-blue-600 font-bold mt-1">Estimasi: Rp{revenueSatuan.toLocaleString("id-ID")}</p>
-                                </div>
+                        <div className="bg-white rounded-2xl border-2 border-orange-100 p-6 shadow-sm mb-8">
+                            <h3 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-2">
+                                📊 Penjualan Per Varian
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {productStats.length === 0 ? (
+                                    <p className="text-gray-400 text-sm italic col-span-full">Belum ada varian yang terjual hari ini.</p>
+                                ) : (
+                                    productStats.map(stat => (
+                                        <div key={stat.id} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-2xl">{stat.emoji}</span>
+                                                <span className="font-bold text-gray-700">{stat.name}</span>
+                                            </div>
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-500">Total:</span>
+                                                    <span className="font-black text-primary">{stat.totalQty} pcs</span>
+                                                </div>
+                                                <div className="flex justify-between text-xs">
+                                                    <span className="text-gray-400">Paket (3):</span>
+                                                    <span className="font-bold text-orange-600">{stat.bundles} pkt</span>
+                                                </div>
+                                                <div className="flex justify-between text-xs">
+                                                    <span className="text-gray-400">Satuan:</span>
+                                                    <span className="font-bold text-blue-600">{stat.satuan} pcs</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
 
@@ -385,8 +412,10 @@ export default function AdminPage() {
                                                                 <span className="ml-1 text-xs text-gray-500">({order.kelas})</span>
                                                             )}
                                                         </td>
-                                                        <td className="px-4 py-3 text-gray-700 max-w-[200px]">
-                                                            <span className="line-clamp-2">{formatItemDetail(order)}</span>
+                                                        <td className="px-4 py-3 text-gray-700 max-w-[250px]">
+                                                            <div className="whitespace-pre-line text-xs leading-relaxed">
+                                                                {formatItemDetail(order)}
+                                                            </div>
                                                         </td>
                                                         <td className="px-4 py-3 font-bold text-primary whitespace-nowrap">
                                                             Rp{order.total.toLocaleString("id-ID")}

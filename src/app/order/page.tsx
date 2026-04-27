@@ -69,10 +69,11 @@ export default function OrderPage() {
     };
 
     const calcTotal = (): number => {
-        const totalQty = form.items.reduce((sum, item) => sum + item.qty, 0);
-        const bundles = Math.floor(totalQty / 3);
-        const individual = totalQty % 3;
-        return (bundles * 10000) + (individual * 5000);
+        return form.items.reduce((total, item) => {
+            const bundles = Math.floor(item.qty / 3);
+            const individual = item.qty % 3;
+            return total + (bundles * 10000) + (individual * 5000);
+        }, 0);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -354,7 +355,7 @@ export default function OrderPage() {
                                 </div>
 
                                 <div className="mt-4 bg-yellow-400/20 border-2 border-yellow-400 rounded-2xl p-4 text-xs text-yellow-800 font-black uppercase tracking-widest text-center animate-pulse">
-                                    🎁 Promo: Beli 3 (Mix Apa Saja) Cuma Rp10.000!
+                                    🎁 Promo: Beli 3 (Varian Sama) Cuma Rp10.000!
                                 </div>
 
                                 <button
