@@ -55,12 +55,12 @@ export default function OrderPage() {
         return Object.keys(errs).length === 0;
     };
 
-    const checkReferral = (code: string) => {
+    const checkReferral = async (code: string) => {
         if (!code.trim()) {
             setReferralMsg("");
             return;
         }
-        const aff = getAffiliate(code.trim().toUpperCase());
+        const aff = await getAffiliate(code.trim().toUpperCase());
         if (!aff) {
             setReferralMsg("❌ Kode tidak ditemukan");
         } else {
@@ -77,11 +77,11 @@ export default function OrderPage() {
         }, 0);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
 
-        const orders = getOrders();
+        const orders = await getOrders();
         const code = generateOrderCode(orders);
         const total = calcTotal();
 
@@ -92,13 +92,13 @@ export default function OrderPage() {
         let affCode: string | undefined;
         if (boughtIsi3) {
             // CHECK IF ALREADY HAS CODE
-            const existingCode = findAffiliateByWA(form.whatsapp);
+            const existingCode = await findAffiliateByWA(form.whatsapp);
             if (existingCode) {
                 affCode = existingCode;
             } else {
                 affCode = generateAffiliateCode();
                 // Save new affiliate entry
-                saveAffiliate(affCode, {
+                await saveAffiliate(affCode, {
                     ownerName: form.name,
                     ownerWA: form.whatsapp,
                     usedBy: [],
@@ -121,7 +121,7 @@ export default function OrderPage() {
             createdAt: new Date().toISOString(),
         };
 
-        saveOrder(order);
+        await saveOrder(order);
 
         // Dispatch custom event for admin dashboard
         if (typeof window !== "undefined") {

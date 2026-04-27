@@ -81,9 +81,11 @@ export default function AdminPage() {
         }
     }, [router]);
 
-    const loadData = useCallback(() => {
-        setOrders(getTodayOrders());
-        setAffiliates(getAffiliates());
+    const loadData = useCallback(async () => {
+        const todayOrders = await getTodayOrders();
+        const allAffiliates = await getAffiliates();
+        setOrders(todayOrders);
+        setAffiliates(allAffiliates);
     }, []);
 
     const handleLogout = () => {
@@ -117,27 +119,27 @@ export default function AdminPage() {
 
     if (!isAuth) return null;
 
-    const handleStatusChange = (code: string, status: OrderStatus) => {
-        updateOrderStatus(code, status);
-        loadData();
+    const handleStatusChange = async (code: string, status: OrderStatus) => {
+        await updateOrderStatus(code, status);
+        await loadData();
     };
 
-    const handleDeleteOrder = (code: string) => {
+    const handleDeleteOrder = async (code: string) => {
         if (confirm("Apakah Anda yakin ingin menghapus pesanan ini secara permanen?")) {
-            deleteOrder(code);
-            loadData();
+            await deleteOrder(code);
+            await loadData();
         }
     };
 
-    const handleUpdateReward = (code: string, claimed: boolean) => {
-        updateAffiliateReward(code, claimed);
-        loadData();
+    const handleUpdateReward = async (code: string, claimed: boolean) => {
+        await updateAffiliateReward(code, claimed);
+        await loadData();
     };
 
-    const handleDeleteAffiliate = (code: string) => {
+    const handleDeleteAffiliate = async (code: string) => {
         if (confirm(`Apakah Anda yakin ingin menghapus partner afiliasi ${code} ini secara permanen? Semua data progres referral untuk kode ini akan hilang.`)) {
-            deleteAffiliate(code);
-            loadData();
+            await deleteAffiliate(code);
+            await loadData();
         }
     };
 

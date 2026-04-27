@@ -24,13 +24,15 @@ export default function AffiliateDashboard() {
             router.push("/afiliasi/login");
         } else {
             setAfilCode(session);
-            const data = getAffiliate(session);
-            setAfilData(data);
+            (async () => {
+                const data = await getAffiliate(session);
+                setAfilData(data);
 
-            // Get orders that used this referral code
-            const allOrders = getOrders();
-            const referrals = allOrders.filter(o => o.referralCode === session);
-            setReferralOrders(referrals);
+                // Get orders that used this referral code
+                const allOrders = await getOrders();
+                const referrals = allOrders.filter(o => o.referralCode === session);
+                setReferralOrders(referrals);
+            })();
         }
     }, [router]);
 

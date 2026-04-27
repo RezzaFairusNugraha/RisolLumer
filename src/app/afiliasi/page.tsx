@@ -17,10 +17,10 @@ export default function AfiliasiPage() {
     const [notFound, setNotFound] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
 
-    const handleCheck = () => {
+    const handleCheck = async () => {
         const trimmed = code.trim().toUpperCase();
         if (!trimmed) return;
-        const aff = getAffiliate(trimmed);
+        const aff = await getAffiliate(trimmed);
         if (!aff) {
             setNotFound(true);
             setResult(null);

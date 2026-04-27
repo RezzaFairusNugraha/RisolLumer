@@ -11,35 +11,33 @@ export default function AfilLoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setLoading(true);
 
-        setTimeout(() => {
-            const trimCode = code.trim().toUpperCase();
-            const aff = getAffiliate(trimCode);
+        const trimCode = code.trim().toUpperCase();
+        const aff = await getAffiliate(trimCode);
 
-            if (!aff) {
-                setError("Kode afiliasi tidak ditemukan. Pastikan kamu sudah beli isi 3.");
-                setLoading(false);
-                return;
-            }
+        if (!aff) {
+            setError("Kode afiliasi tidak ditemukan. Pastikan kamu sudah beli isi 3.");
+            setLoading(false);
+            return;
+        }
 
-            // Verify by matching WA number (partial or full)
-            const normalizeWA = (w: string) => w.replace(/[^0-9]/g, "");
-            const inputWA = normalizeWA(wa.trim());
-            const ownerWA = normalizeWA(aff.ownerWA);
+        // Verify by matching WA number (partial or full)
+        const normalizeWA = (w: string) => w.replace(/[^0-9]/g, "");
+        const inputWA = normalizeWA(wa.trim());
+        const ownerWA = normalizeWA(aff.ownerWA);
 
-            if (inputWA.length < 8 || !ownerWA.endsWith(inputWA.slice(-8))) {
-                setError("Nomor WhatsApp tidak cocok dengan pemilik kode ini.");
-                setLoading(false);
-                return;
-            }
+        if (inputWA.length < 8 || !ownerWA.endsWith(inputWA.slice(-8))) {
+            setError("Nomor WhatsApp tidak cocok dengan pemilik kode ini.");
+            setLoading(false);
+            return;
+        }
 
-            afilLogin(trimCode);
-            router.push("/afiliasi/dashboard");
-        }, 600);
+        afilLogin(trimCode);
+        router.push("/afiliasi/dashboard");
     };
 
     return (

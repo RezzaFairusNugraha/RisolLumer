@@ -36,99 +36,134 @@ const AFFILIATES_KEY = "risol_affiliates";
 
 // ===================== ORDERS =====================
 
-export function getOrders(): Order[] {
-    if (typeof window === "undefined") return [];
+export async function getOrders(): Promise<Order[]> {
     try {
+        const res = await fetch("/api/orders", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to fetch");
+        return await res.json();
+    } catch (err) {
+        console.error("getOrders error:", err);
+        // Fallback to local storage for offline or dev
+        if (typeof window === "undefined") return [];
         const raw = localStorage.getItem(ORDERS_KEY);
         return raw ? (JSON.parse(raw) as Order[]) : [];
-    } catch {
-        return [];
     }
 }
 
-export function saveOrder(order: Order): void {
-    const orders = getOrders();
-    orders.push(order);
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-}
-
-export function updateOrderStatus(code: string, status: OrderStatus): void {
-    const orders = getOrders();
-    const idx = orders.findIndex((o) => o.code === code);
-    if (idx !== -1) {
-        const order = orders[idx];
-        const oldStatus = order.status;
-        order.status = status;
+export async function saveOrder(order: Order): Promise<void> {
+    try {
+        const res = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(order),
+        });
+        if (!res.ok) throw new Error("Failed to save order");
+    } catch (err) {
+        console.error("saveOrder error:", err);
+        // Still save locally as fallback
+        const orders = typeof window !== "undefined" ? JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]") : [];
+        orders.push(order);
         localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-
-        // If status changed to Selesai and it has a referral code, add it
-        if (status === "Selesai" && oldStatus !== "Selesai" && order.referralCode) {
-            addReferral(order.referralCode, order.whatsapp);
-        }
     }
 }
 
-export function getTodayOrders(): Order[] {
-    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-    return getOrders().filter((o) => o.createdAt.startsWith(today));
+export async function updateOrderStatus(code: string, status: OrderStatus): Promise<void> {
+    try {
+        const res = await fetch(`/api/orders/${code}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+        });
+        if (!res.ok) throw new Error("Failed to update status");
+    } catch (err) {
+        console.error("updateOrderStatus error:", err);
+    }
+}
+
+export async function getTodayOrders(): Promise<Order[]> {
+    const orders = await getOrders();
+    const today = new Date().toISOString().slice(0, 10);
+    return orders.filter((o) => o.createdAt.toString().startsWith(today));
 }
 
 // ===================== AFFILIATES =====================
 
-export function getAffiliates(): AffiliatesStore {
-    if (typeof window === "undefined") return {};
+export async function getAffiliates(): Promise<AffiliatesStore> {
     try {
+        const res = await fetch("/api/affiliates", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to fetch");
+        return await res.json();
+    } catch (err) {
+        console.error("getAffiliates error:", err);
+        if (typeof window === "undefined") return {};
         const raw = localStorage.getItem(AFFILIATES_KEY);
         return raw ? (JSON.parse(raw) as AffiliatesStore) : {};
-    } catch {
-        return {};
     }
 }
 
-export function saveAffiliate(code: string, data: AffiliateData): void {
-    const affiliates = getAffiliates();
-    affiliates[code] = data;
-    localStorage.setItem(AFFILIATES_KEY, JSON.stringify(affiliates));
-}
-
-export function getAffiliate(code: string): AffiliateData | null {
-    const affiliates = getAffiliates();
-    return affiliates[code] ?? null;
-}
-
-export function findAffiliateByWA(wa: string): string | null {
-    const affiliates = getAffiliates();
-    const entry = Object.entries(affiliates).find(([_, data]) => data.ownerWA === wa);
-    return entry ? entry[0] : null;
-}
-
-export function updateAffiliateReward(code: string, claimed: boolean): void {
-    const affiliates = getAffiliates();
-    if (affiliates[code]) {
-        affiliates[code].rewardClaimed = claimed;
+export async function saveAffiliate(code: string, data: AffiliateData): Promise<void> {
+    try {
+        const res = await fetch("/api/affiliates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code, ...data }),
+        });
+        if (!res.ok) throw new Error("Failed to save affiliate");
+    } catch (err) {
+        console.error("saveAffiliate error:", err);
+        const affiliates = typeof window !== "undefined" ? JSON.parse(localStorage.getItem(AFFILIATES_KEY) || "{}") : {};
+        affiliates[code] = data;
         localStorage.setItem(AFFILIATES_KEY, JSON.stringify(affiliates));
     }
 }
 
-export function addReferral(code: string, buyerWA: string): void {
-    const affiliates = getAffiliates();
-    const aff = affiliates[code];
-    if (!aff) return;
-    if (aff.usedBy.includes(buyerWA)) return; // no double count
-    aff.usedBy.push(buyerWA);
-    affiliates[code] = aff;
-    localStorage.setItem(AFFILIATES_KEY, JSON.stringify(affiliates));
+export async function getAffiliate(code: string): Promise<AffiliateData | null> {
+    const affiliates = await getAffiliates();
+    return affiliates[code] ?? null;
 }
 
-export function deleteOrder(code: string): void {
-    const orders = getOrders();
-    const filtered = orders.filter((o) => o.code !== code);
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(filtered));
+export async function findAffiliateByWA(wa: string): Promise<string | null> {
+    const affiliates = await getAffiliates();
+    const entry = Object.entries(affiliates).find(([_, data]: [string, any]) => data.ownerWA === wa);
+    return entry ? entry[0] : null;
 }
 
-export function deleteAffiliate(code: string): void {
-    const affiliates = getAffiliates();
-    delete affiliates[code];
-    localStorage.setItem(AFFILIATES_KEY, JSON.stringify(affiliates));
+export async function updateAffiliateReward(code: string, claimed: boolean): Promise<void> {
+    try {
+        const aff = await getAffiliate(code);
+        if (aff) {
+            await saveAffiliate(code, { ...aff, rewardClaimed: claimed });
+        }
+    } catch (err) {
+        console.error("updateAffiliateReward error:", err);
+    }
+}
+
+export async function addReferral(code: string, buyerWA: string): Promise<void> {
+    try {
+        const aff = await getAffiliate(code);
+        if (!aff) return;
+        if (aff.usedBy.includes(buyerWA)) return;
+        const newUsedBy = [...aff.usedBy, buyerWA];
+        await saveAffiliate(code, { ...aff, usedBy: newUsedBy });
+    } catch (err) {
+        console.error("addReferral error:", err);
+    }
+}
+
+export async function deleteOrder(code: string): Promise<void> {
+    try {
+        await fetch(`/api/orders/${code}`, { method: "DELETE" });
+    } catch (err) {
+        console.error("deleteOrder error:", err);
+    }
+}
+
+export async function deleteAffiliate(code: string): Promise<void> {
+    try {
+        await fetch(`/api/affiliates/${code}`, { method: "DELETE" });
+    } catch (err) {
+        console.error("deleteAffiliate error:", err);
+    }
 }
 

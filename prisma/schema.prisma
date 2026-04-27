@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  slug      String   @unique // machine name like 'matcha', 'original'
+  name      String
+  emoji     String
+  color     String
+  price1    Int
+  price3    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    OrderItem[]
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  code          String      @unique // readable code like RL-1234
+  name          String
+  whatsapp      String
+  type          String      // 'ambil' or 'antar'
+  kelas         String?
+  total         Int
+  status        String      @default("Baru") // 'Baru', 'Diproses', 'Selesai', 'Dibatalkan'
+  referralCode  String?
+  affiliateCode String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  qty       Int
+  packaging String  // '1pcs' or 'isi3'
+}
+
+model Affiliate {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  ownerName     String
+  ownerWA       String
+  usedBy        String[] @default([]) // Array of buyer WA numbers
+  rewardClaimed Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  type      String   @default("info") // 'success', 'error', 'warning', 'info'
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
