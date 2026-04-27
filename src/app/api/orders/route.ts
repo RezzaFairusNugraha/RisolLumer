@@ -39,15 +39,24 @@ export async function POST(req: Request) {
                 affiliateCode,
                 status: "Baru",
                 items: {
-                    create: items.map((item: any) => {
-                        // Use either the resolved ID from slug, or the original productId if it's already an ID
-                        const resolvedId = productSlugMap.get(item.productId) || item.productId;
+                    create: await Promise.all(items.map(async (item: any) => {
+                        let resolvedId = productSlugMap.get(item.productId);
+
+                        // If not found in map, try looking it up directly by slug
+                        if (!resolvedId) {
+                            const p = await prisma.product.findUnique({ where: { slug: item.productId } });
+                            resolvedId = p?.id;
+                        }
+
+                        // Fallback to original productId (might be a CUID already, or will fail gracefully with FK error)
+                        resolvedId = resolvedId || item.productId;
+
                         return {
                             productId: resolvedId,
                             qty: item.qty,
                             packaging: item.packaging,
                         };
-                    }),
+                    })),
                 },
             },
             include: {

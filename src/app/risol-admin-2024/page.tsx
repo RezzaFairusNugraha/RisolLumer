@@ -21,6 +21,7 @@ import { useToast } from "@/components/ToastContext";
 
 type FilterStatus = "semua" | OrderStatus;
 type FilterType = "semua" | "ambil" | "antar";
+type FilterTime = "today" | "all";
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
     Baru: "bg-yellow-100 text-yellow-800",
@@ -83,6 +84,7 @@ export default function AdminPage() {
     const [affiliates, setAffiliates] = useState<Record<string, AffiliateData>>({});
     const [filterStatus, setFilterStatus] = useState<FilterStatus>("semua");
     const [filterType, setFilterType] = useState<FilterType>("semua");
+    const [filterTime, setFilterTime] = useState<FilterTime>("all"); // Default to 'all' to ensure no orders are missed
     const [highlightCode, setHighlightCode] = useState<string | null>(null);
     const highlightTimer = useRef<NodeJS.Timeout | null>(null);
     const { showToast } = useToast();
@@ -96,12 +98,12 @@ export default function AdminPage() {
     }, [router]);
 
     const loadData = useCallback(async () => {
-        const [todayOrders, allAffiliates, allProducts] = await Promise.all([
-            getTodayOrders(),
+        const [allOrders, allAffiliates, allProducts] = await Promise.all([
+            getOrders(),
             getAffiliates(),
             getDbProducts()
         ]);
-        setOrders(todayOrders);
+        setOrders(allOrders);
         setAffiliates(allAffiliates);
         setDbProducts(allProducts);
     }, []);
@@ -166,19 +168,27 @@ export default function AdminPage() {
         await loadData();
     };
 
-    // Stats
-    const todayTotal = orders.length;
-    const todayRevenue = orders.reduce((s, o) => s + o.total, 0);
-    const todayAmbil = orders.filter((o) => o.type === "ambil").length;
-    const todayAntar = orders.filter((o) => o.type === "antar").length;
+    // Filtered orders (Time filter first)
+    const timeFiltered = orders.filter((o) => {
+        if (filterTime === "all") return true;
+        const today = new Date().toLocaleDateString('en-CA');
+        const orderDate = new Date(o.createdAt).toLocaleDateString('en-CA');
+        return orderDate === today;
+    });
+
+    // Stats based on time filter
+    const statsTotal = timeFiltered.length;
+    const statsRevenue = timeFiltered.reduce((s, o) => s + o.total, 0);
+    const statsAmbil = timeFiltered.filter((o) => o.type === "ambil").length;
+    const statsAntar = timeFiltered.filter((o) => o.type === "antar").length;
 
     // Product Map for lookup
     const productMap = new Map(dbProducts.map(p => [p.id, p]));
 
     // Detailed Stats (Product Breakdown)
     const productStats = dbProducts.map(p => {
-        const qty = orders.reduce((sum, o) => {
-            const item = o.items.find(i => i.productId === p.id);
+        const qty = timeFiltered.reduce((sum, o) => {
+            const item = o.items?.find(i => i.productId === p.id);
             return sum + (item?.qty || 0);
         }, 0);
         const bundles = Math.floor(qty / 3);
@@ -193,8 +203,8 @@ export default function AdminPage() {
 
     const totalQtySold = productStats.reduce((s, p) => s + p.totalQty, 0);
 
-    // Filtered orders
-    const filtered = orders.filter((o) => {
+    // Main list filter
+    const filtered = timeFiltered.filter((o) => {
         const statusMatch = filterStatus === "semua" || o.status === filterStatus;
         const typeMatch = filterType === "semua" || o.type === filterType;
         return statusMatch && typeMatch;
@@ -276,10 +286,10 @@ export default function AdminPage() {
                         {/* === STATS CARDS === */}
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                             {[
-                                { label: "Pemasukan Hari Ini", value: `Rp${todayRevenue.toLocaleString("id-ID")}`, icon: "💰", color: "bg-green-50 border-green-200" },
-                                { label: "Total Pesanan", value: todayTotal, icon: "📦", color: "bg-blue-50 border-blue-200" },
-                                { label: "Ambil Sendiri", value: todayAmbil, icon: "🏪", color: "bg-yellow-50 border-yellow-200" },
-                                { label: "Diantar", value: todayAntar, icon: "🛵", color: "bg-purple-50 border-purple-200" },
+                                { label: filterTime === "today" ? "Pemasukan Hari Ini" : "Total Pemasukan", value: `Rp${statsRevenue.toLocaleString("id-ID")}`, icon: "💰", color: "bg-green-50 border-green-200" },
+                                { label: filterTime === "today" ? "Pesanan Hari Ini" : "Semua Pesanan", value: statsTotal, icon: "📦", color: "bg-blue-50 border-blue-200" },
+                                { label: "Ambil Sendiri", value: statsAmbil, icon: "🏪", color: "bg-yellow-50 border-yellow-200" },
+                                { label: "Diantar", value: statsAntar, icon: "🛵", color: "bg-purple-50 border-purple-200" },
                             ].map((card, i) => (
                                 <div key={i} className={`rounded-2xl border-2 p-5 ${card.color}`}>
                                     <div className="text-3xl mb-2">{card.icon}</div>
@@ -316,7 +326,7 @@ export default function AdminPage() {
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {productStats.length === 0 ? (
-                                    <p className="text-gray-400 text-sm italic col-span-full">Belum ada varian yang terjual hari ini.</p>
+                                    <p className="text-gray-400 text-sm italic col-span-full">Belum ada statistik penjualan untuk periode ini.</p>
                                 ) : (
                                     productStats.map(stat => (
                                         <div key={stat.id} className={`rounded-xl p-4 border transition-all ${stat.isAvailable ? 'bg-gray-50 border-gray-100' : 'bg-red-50 border-red-100 grayscale-[0.5]'}`}>
@@ -353,7 +363,23 @@ export default function AdminPage() {
                         </div>
 
                         {/* === FILTERS & EXPORT === */}
-                        <div className="bg-white rounded-2xl shadow-sm p-4 mb-6 flex flex-wrap gap-3 items-center">
+                        <div className="bg-white rounded-2xl shadow-sm p-4 mb-6 flex flex-wrap gap-4 items-center">
+                            <div className="flex gap-2 items-center">
+                                <label className="text-sm font-bold text-gray-600">Waktu:</label>
+                                <button
+                                    onClick={() => setFilterTime("today")}
+                                    className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-all ${filterTime === "today" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                                >
+                                    Hari Ini
+                                </button>
+                                <button
+                                    onClick={() => setFilterTime("all")}
+                                    className={`px-4 py-1.5 rounded-xl text-sm font-bold transition-all ${filterTime === "all" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                                >
+                                    Semua Waktu
+                                </button>
+                            </div>
+                            <div className="h-6 w-px bg-gray-200 mx-2 hidden sm:block"></div>
                             <div className="flex gap-2 items-center">
                                 <label className="text-sm font-bold text-gray-600">Status:</label>
                                 {(["semua", "Baru", "Diproses", "Selesai"] as FilterStatus[]).map((s) => (
@@ -502,7 +528,7 @@ export default function AdminPage() {
                             </div>
                         </div>
                         <p className="text-xs text-gray-400 text-center mt-4">
-                            Menampilkan pesanan hari ini saja • Total: {filtered.length} pesanan
+                            Menampilkan {filterTime === "today" ? "pesanan hari ini saja" : "semua pesanan"} • Total: {filtered.length} pesanan
                         </p>
                     </>
                 ) : (
