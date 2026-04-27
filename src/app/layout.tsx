@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ToastProvider } from "@/components/ToastContext";
 
 export const metadata: Metadata = {
     title: "Risol Lumer — Lumer di mulut, awet di hati 🫓",
@@ -23,7 +24,9 @@ export default function RootLayout({
                 />
             </head>
             <body className="font-nunito bg-cream min-h-screen">
-                {children}
+                <ToastProvider>
+                    {children}
+                </ToastProvider>
             </body>
         </html>
     );

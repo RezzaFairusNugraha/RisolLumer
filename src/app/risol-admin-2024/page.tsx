@@ -15,7 +15,7 @@ import {
 } from "@/lib/storage";
 import { PRODUCTS } from "@/lib/products";
 import { isAdminLoggedIn, adminLogout } from "@/lib/auth";
-import NotifToast from "@/components/NotifToast";
+import { useToast } from "@/components/ToastContext";
 
 type FilterStatus = "semua" | OrderStatus;
 type FilterType = "semua" | "ambil" | "antar";
@@ -69,9 +69,9 @@ export default function AdminPage() {
     const [affiliates, setAffiliates] = useState<Record<string, AffiliateData>>({});
     const [filterStatus, setFilterStatus] = useState<FilterStatus>("semua");
     const [filterType, setFilterType] = useState<FilterType>("semua");
-    const [toastMsg, setToastMsg] = useState<string | null>(null);
     const [highlightCode, setHighlightCode] = useState<string | null>(null);
     const highlightTimer = useRef<NodeJS.Timeout | null>(null);
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (!isAdminLoggedIn()) {
@@ -98,8 +98,8 @@ export default function AdminPage() {
         const handleNewOrder = (e: Event) => {
             const order = (e as CustomEvent<Order>).detail;
             loadData();
-            // ... toast logic
-            setToastMsg(`Pesanan baru masuk! — ${order.name}`);
+            // Notify via toast system
+            showToast(`Pesanan baru masuk! — ${order.name}`, "info");
             playDing();
             document.title = "(1) Pesanan Baru! — Risol Lumer";
             setHighlightCode(order.code);
@@ -116,11 +116,6 @@ export default function AdminPage() {
     }, [loadData, isAuth]);
 
     if (!isAuth) return null;
-
-    const handleToastClose = () => {
-        setToastMsg(null);
-        document.title = "Admin Dashboard — Risol Lumer";
-    };
 
     const handleStatusChange = (code: string, status: OrderStatus) => {
         updateOrderStatus(code, status);
@@ -184,9 +179,6 @@ export default function AdminPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Toast */}
-            {toastMsg && <NotifToast message={toastMsg} onClose={handleToastClose} />}
-
             {/* Header */}
             <div className="bg-primary text-white px-4 sm:px-6 lg:px-8 py-6">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
