@@ -149,21 +149,16 @@ export default function AdminPage() {
     const todayAmbil = orders.filter((o) => o.type === "ambil").length;
     const todayAntar = orders.filter((o) => o.type === "antar").length;
 
-    // Detailed Stats
-    const totalIsi3 = orders.reduce((acc, order) => {
-        return acc + order.items
-            .filter(item => item.packaging === 'isi3')
-            .reduce((sum, item) => sum + (item.qty || 0), 0);
+    // Detailed Stats (Mix & Match Logic)
+    const totalQty = orders.reduce((acc, order) => {
+        return acc + order.items.reduce((sum, item) => sum + (item.qty || 0), 0);
     }, 0);
 
-    const total1pcs = orders.reduce((acc, order) => {
-        return acc + order.items
-            .filter(item => item.packaging === '1pcs')
-            .reduce((sum, item) => sum + (item.qty || 0), 0);
-    }, 0);
+    const totalBundles = Math.floor(totalQty / 3);
+    const totalSatuan = totalQty % 3;
 
-    const revenueIsi3 = totalIsi3 * 10000;
-    const revenue1pcs = total1pcs * 5000;
+    const revenueBundles = totalBundles * 10000;
+    const revenueSatuan = totalSatuan * 5000;
 
     // Filtered orders
     const filtered = orders.filter((o) => {
@@ -264,25 +259,25 @@ export default function AdminPage() {
                         {/* === PRODUCT BREAKDOWN === */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                             <div className="bg-white rounded-2xl border-2 border-orange-100 p-6 shadow-sm flex items-center gap-6">
-                                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl">🍱</div>
+                                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl">🎁</div>
                                 <div className="flex-1">
-                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Risol Isi 3 (10rb)</h3>
+                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Paket 3 (Mix)</h3>
                                     <div className="flex items-baseline gap-2 mt-1">
-                                        <span className="text-3xl font-black text-gray-800">{totalIsi3}</span>
-                                        <span className="text-gray-400 font-bold">Porsi</span>
+                                        <span className="text-3xl font-black text-gray-800">{totalBundles}</span>
+                                        <span className="text-gray-400 font-bold">Paket</span>
                                     </div>
-                                    <p className="text-orange-600 font-bold mt-1">Total: Rp{revenueIsi3.toLocaleString("id-ID")}</p>
+                                    <p className="text-orange-600 font-bold mt-1">Estimasi: Rp{revenueBundles.toLocaleString("id-ID")}</p>
                                 </div>
                             </div>
                             <div className="bg-white rounded-2xl border-2 border-blue-100 p-6 shadow-sm flex items-center gap-6">
                                 <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center text-3xl">🥟</div>
                                 <div className="flex-1">
-                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Risol 1 Pcs (5rb)</h3>
+                                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Satuan</h3>
                                     <div className="flex items-baseline gap-2 mt-1">
-                                        <span className="text-3xl font-black text-gray-800">{total1pcs}</span>
+                                        <span className="text-3xl font-black text-gray-800">{totalSatuan}</span>
                                         <span className="text-gray-400 font-bold">Pcs</span>
                                     </div>
-                                    <p className="text-blue-600 font-bold mt-1">Total: Rp{revenue1pcs.toLocaleString("id-ID")}</p>
+                                    <p className="text-blue-600 font-bold mt-1">Estimasi: Rp{revenueSatuan.toLocaleString("id-ID")}</p>
                                 </div>
                             </div>
                         </div>

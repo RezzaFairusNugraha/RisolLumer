@@ -21,7 +21,7 @@ interface FormState {
     whatsapp: string;
     kelas: string;
     referralCode: string;
-    items: { productId: string; qty: number; packaging: Packaging }[];
+    items: { productId: string; qty: number }[];
 }
 
 const INITIAL_FORM: FormState = {
@@ -29,7 +29,7 @@ const INITIAL_FORM: FormState = {
     whatsapp: "",
     kelas: "",
     referralCode: "",
-    items: PRODUCTS.map((p) => ({ productId: p.id, qty: 0, packaging: "1pcs" as Packaging })),
+    items: PRODUCTS.map((p) => ({ productId: p.id, qty: 0 })),
 };
 
 export default function OrderPage() {
@@ -69,12 +69,10 @@ export default function OrderPage() {
     };
 
     const calcTotal = (): number => {
-        return form.items.reduce((sum, item) => {
-            const prod = PRODUCTS.find((p) => p.id === item.productId);
-            if (!prod || item.qty === 0) return sum;
-            const price = item.packaging === "1pcs" ? prod.price1 : prod.price3;
-            return sum + price * item.qty;
-        }, 0);
+        const totalQty = form.items.reduce((sum, item) => sum + item.qty, 0);
+        const bundles = Math.floor(totalQty / 3);
+        const individual = totalQty % 3;
+        return (bundles * 10000) + (individual * 5000);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -85,10 +83,12 @@ export default function OrderPage() {
         const code = generateOrderCode(orders);
         const total = calcTotal();
 
-        const activeItems: OrderItem[] = form.items.filter((i) => i.qty > 0);
+        const activeItems: OrderItem[] = form.items
+            .filter((i) => i.qty > 0)
+            .map(i => ({ ...i, packaging: "1pcs" as Packaging }));
 
-        // Check if buyer gets affil code (bought isi3)
-        const boughtIsi3 = activeItems.some((i) => i.packaging === "isi3");
+        const totalQty = activeItems.reduce((s, i) => s + i.qty, 0);
+        const boughtIsi3 = totalQty >= 3;
         let affCode: string | undefined;
         if (boughtIsi3) {
             // CHECK IF ALREADY HAS CODE
@@ -134,8 +134,8 @@ export default function OrderPage() {
 
     const updateItem = (
         productId: string,
-        field: "qty" | "packaging",
-        value: number | Packaging
+        field: "qty",
+        value: number
     ) => {
         setForm((prev) => ({
             ...prev,
@@ -262,46 +262,31 @@ export default function OrderPage() {
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                    {/* Packaging */}
+                                                <div className="flex items-center justify-between mt-4 bg-gray-50 border border-gray-100 rounded-xl p-3">
                                                     <div>
-                                                        <label className="label text-xs">Pilih Kemasan</label>
-                                                        <select
-                                                            id={`packaging-${prod.id}`}
-                                                            className="input-field text-sm py-2 bg-gray-50 border-gray-100"
-                                                            value={item.packaging}
-                                                            onChange={(e) =>
-                                                                updateItem(prod.id, "packaging", e.target.value as Packaging)
-                                                            }
-                                                        >
-                                                            <option value="1pcs">1 pcs — Rp5.000</option>
-                                                            <option value="isi3">Isi 3 — Rp10.000 🎁</option>
-                                                        </select>
+                                                        <label className="label text-[10px] uppercase text-gray-400">Jumlah Pesanan</label>
+                                                        <p className="text-sm font-bold text-gray-700">Rp5.000 / pcs</p>
                                                     </div>
-                                                    {/* Qty */}
-                                                    <div>
-                                                        <label className="label text-xs">Jumlah Pesanan</label>
-                                                        <div className="flex items-center gap-2">
-                                                            <button
-                                                                type="button"
-                                                                id={`qty-minus-${prod.id}`}
-                                                                onClick={() => updateItem(prod.id, "qty", Math.max(0, item.qty - 1))}
-                                                                className="w-10 h-10 bg-gray-100 rounded-xl font-bold hover:bg-gray-200 transition-colors flex items-center justify-center min-h-[44px]"
-                                                            >
-                                                                −
-                                                            </button>
-                                                            <span className="w-8 text-center font-black text-gray-800 text-lg">
-                                                                {item.qty}
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                id={`qty-plus-${prod.id}`}
-                                                                onClick={() => updateItem(prod.id, "qty", item.qty + 1)}
-                                                                className="w-10 h-10 bg-primary text-white rounded-xl font-bold text-lg hover:bg-primary-dark transition-colors flex items-center justify-center min-h-[44px]"
-                                                            >
-                                                                +
-                                                            </button>
-                                                        </div>
+                                                    <div className="flex items-center gap-4">
+                                                        <button
+                                                            type="button"
+                                                            id={`qty-minus-${prod.id}`}
+                                                            onClick={() => updateItem(prod.id, "qty", Math.max(0, item.qty - 1))}
+                                                            className="w-10 h-10 bg-white border-2 border-gray-100 rounded-xl font-bold hover:border-primary/50 transition-colors flex items-center justify-center min-h-[44px]"
+                                                        >
+                                                            −
+                                                        </button>
+                                                        <span className="w-8 text-center font-black text-gray-800 text-xl">
+                                                            {item.qty}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            id={`qty-plus-${prod.id}`}
+                                                            onClick={() => updateItem(prod.id, "qty", item.qty + 1)}
+                                                            className="w-10 h-10 bg-primary text-white rounded-xl font-bold text-xl hover:bg-primary-dark shadow-md transition-all flex items-center justify-center min-h-[44px]"
+                                                        >
+                                                            +
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -348,13 +333,12 @@ export default function OrderPage() {
                                         .filter((i) => i.qty > 0)
                                         .map((item) => {
                                             const prod = PRODUCTS.find((p) => p.id === item.productId)!;
-                                            const price = item.packaging === "1pcs" ? prod.price1 : prod.price3;
                                             return (
                                                 <div key={item.productId} className="flex justify-between text-sm text-gray-700">
                                                     <span>
-                                                        {prod.emoji} {prod.name} {item.packaging === "isi3" ? "(isi3)" : ""} ×{item.qty}
+                                                        {prod.emoji} {prod.name} ×{item.qty}
                                                     </span>
-                                                    <span className="font-bold">Rp{(price * item.qty).toLocaleString("id-ID")}</span>
+                                                    <span className="font-bold">Rp{(5000 * item.qty).toLocaleString("id-ID")}</span>
                                                 </div>
                                             );
                                         })}
@@ -369,9 +353,8 @@ export default function OrderPage() {
                                     </div>
                                 </div>
 
-                                {/* Isi 3 hint */}
-                                <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-700">
-                                    💡 Pilih kemasan <strong>Isi 3</strong> untuk dapat kode afiliasi gratis!
+                                <div className="mt-4 bg-yellow-400/20 border-2 border-yellow-400 rounded-2xl p-4 text-xs text-yellow-800 font-black uppercase tracking-widest text-center animate-pulse">
+                                    🎁 Promo: Beli 3 (Mix Apa Saja) Cuma Rp10.000!
                                 </div>
 
                                 <button
