@@ -76,11 +76,10 @@ export default function OrderPage() {
     };
 
     const calcTotal = (): number => {
-        return form.items.reduce((total, item) => {
-            const bundles = Math.floor(item.qty / 3);
-            const individual = item.qty % 3;
-            return total + (bundles * 10000) + (individual * 5000);
-        }, 0);
+        const totalQty = form.items.reduce((s, i) => s + i.qty, 0);
+        const bundles = Math.floor(totalQty / 3);
+        const individual = totalQty % 3;
+        return (bundles * 10000) + (individual * 5000);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -360,7 +359,7 @@ export default function OrderPage() {
                                                     <span>
                                                         {prod.emoji} {prod.name} ×{item.qty}
                                                     </span>
-                                                    <span className="font-bold">Rp{(5000 * item.qty).toLocaleString("id-ID")}</span>
+                                                    <span className="font-bold">Rp{(prod.price1 * item.qty).toLocaleString("id-ID")}</span>
                                                 </div>
                                             );
                                         })}

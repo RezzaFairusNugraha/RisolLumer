@@ -51,18 +51,19 @@ export default function OrderSummary({ order, affiliateCode, onClose }: OrderSum
                         <div className="space-y-2">
                             {order.items.map((item, idx) => {
                                 const prod = PRODUCTS.find((p) => p.id === item.productId);
-                                const price = item.packaging === "1pcs" ? (prod?.price1 ?? 0) : (prod?.price3 ?? 0);
-                                const subtotal = price * item.qty;
+
                                 return (
                                     <div
                                         key={idx}
                                         className="flex justify-between items-center text-sm py-2 border-b border-gray-100"
                                     >
-                                        <span className="font-medium text-gray-700">
-                                            {prod?.emoji} {prod?.name} {item.packaging === "isi3" ? "(isi 3)" : "(1 pcs)"} × {item.qty}
-                                        </span>
-                                        <span className="font-bold text-primary">
-                                            Rp{subtotal.toLocaleString("id-ID")}
+                                        <div className="flex items-center gap-2">
+                                            <span>{prod?.emoji}</span>
+                                            <span className="font-bold text-gray-800">{prod?.name}</span>
+                                            <span className="text-gray-400">×{item.qty}</span>
+                                        </div>
+                                        <span className="text-gray-500 line-through text-[10px] mr-1">
+                                            Rp{(item.qty * 5000).toLocaleString("id-ID")}
                                         </span>
                                     </div>
                                 );
@@ -71,9 +72,17 @@ export default function OrderSummary({ order, affiliateCode, onClose }: OrderSum
                     </div>
 
                     {/* Total */}
-                    <div className="flex justify-between items-center font-black text-lg bg-primary/10 rounded-2xl px-4 py-3">
-                        <span className="text-gray-800">Total</span>
-                        <span className="text-primary">Rp{order.total.toLocaleString("id-ID")}</span>
+                    <div className="space-y-1">
+                        {order.total < (order.items.reduce((s, i) => s + i.qty, 0) * 5000) && (
+                            <div className="flex justify-between items-center text-xs text-green-600 font-bold px-4">
+                                <span>Promo Mix & Match ✨</span>
+                                <span>-Rp{((order.items.reduce((s, i) => s + i.qty, 0) * 5000) - order.total).toLocaleString("id-ID")}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between items-center font-black text-lg bg-primary/10 rounded-2xl px-4 py-3">
+                            <span className="text-gray-800">Total</span>
+                            <span className="text-primary">Rp{order.total.toLocaleString("id-ID")}</span>
+                        </div>
                     </div>
 
                     {/* Affiliate code earned */}
