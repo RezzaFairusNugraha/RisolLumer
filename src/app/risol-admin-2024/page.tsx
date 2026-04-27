@@ -290,6 +290,26 @@ export default function AdminPage() {
                         </div>
 
                         {/* === PRODUCT BREAKDOWN === */}
+                        {dbProducts.length === 0 && (
+                            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 mb-8 text-center">
+                                <p className="text-red-700 font-bold mb-2">⚠️ Database Produk Kosong!</p>
+                                <p className="text-sm text-red-600 mb-4">Sepertinya data produk belum dimasukkan ke database. Hal ini menyebabkan pesanan tidak bisa masuk.</p>
+                                <button
+                                    onClick={async () => {
+                                        const res = await fetch("/api/products/seed", { method: "POST" });
+                                        if (res.ok) {
+                                            alert("Produk berhasil di-seed! Silakan refresh.");
+                                            loadData();
+                                        } else {
+                                            alert("Gagal melakukan seeding.");
+                                        }
+                                    }}
+                                    className="bg-red-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-red-700 transition-all shadow-md"
+                                >
+                                    🌱 Seed Database Produk Sekarang
+                                </button>
+                            </div>
+                        )}
                         <div className="bg-white rounded-2xl border-2 border-orange-100 p-6 shadow-sm mb-8">
                             <h3 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-2">
                                 📊 Penjualan Per Varian

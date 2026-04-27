@@ -56,8 +56,12 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json(order);
-    } catch (error) {
+    } catch (error: any) {
         console.error("POST Order Error:", error);
-        return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to create order",
+            message: error.message,
+            code: error.code
+        }, { status: 500 });
     }
 }
