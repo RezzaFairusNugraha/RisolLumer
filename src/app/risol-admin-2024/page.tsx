@@ -12,6 +12,8 @@ import {
     updateAffiliateReward,
     deleteAffiliate,
     AffiliateData,
+    getDbProducts,
+    updateProductAvailability,
 } from "@/lib/storage";
 import { PRODUCTS } from "@/lib/products";
 import { isAdminLoggedIn, adminLogout } from "@/lib/auth";
@@ -51,10 +53,10 @@ function playDing() {
     }
 }
 
-function formatItemDetail(order: Order): string {
+function formatItemDetail(order: Order, productMap: Map<string, any>): string {
     return order.items
         .map((item) => {
-            const prod = PRODUCTS.find((p) => p.id === item.productId);
+            const prod = productMap.get(item.productId);
             // Calculate bundles for this item
             const bundles = Math.floor(item.qty / 3);
             const satuan = item.qty % 3;
@@ -77,6 +79,7 @@ export default function AdminPage() {
     const [isAuth, setIsAuth] = useState(false);
     const [activeTab, setActiveTab] = useState<"pesanan" | "afiliasi">("pesanan");
     const [orders, setOrders] = useState<Order[]>([]);
+    const [dbProducts, setDbProducts] = useState<any[]>([]);
     const [affiliates, setAffiliates] = useState<Record<string, AffiliateData>>({});
     const [filterStatus, setFilterStatus] = useState<FilterStatus>("semua");
     const [filterType, setFilterType] = useState<FilterType>("semua");
@@ -93,10 +96,14 @@ export default function AdminPage() {
     }, [router]);
 
     const loadData = useCallback(async () => {
-        const todayOrders = await getTodayOrders();
-        const allAffiliates = await getAffiliates();
+        const [todayOrders, allAffiliates, allProducts] = await Promise.all([
+            getTodayOrders(),
+            getAffiliates(),
+            getDbProducts()
+        ]);
         setOrders(todayOrders);
         setAffiliates(allAffiliates);
+        setDbProducts(allProducts);
     }, []);
 
     const handleLogout = () => {
@@ -154,14 +161,22 @@ export default function AdminPage() {
         }
     };
 
+    const handleToggleAvailability = async (id: string, current: boolean) => {
+        await updateProductAvailability(id, !current);
+        await loadData();
+    };
+
     // Stats
     const todayTotal = orders.length;
     const todayRevenue = orders.reduce((s, o) => s + o.total, 0);
     const todayAmbil = orders.filter((o) => o.type === "ambil").length;
     const todayAntar = orders.filter((o) => o.type === "antar").length;
 
+    // Product Map for lookup
+    const productMap = new Map(dbProducts.map(p => [p.id, p]));
+
     // Detailed Stats (Product Breakdown)
-    const productStats = PRODUCTS.map(p => {
+    const productStats = dbProducts.map(p => {
         const qty = orders.reduce((sum, o) => {
             const item = o.items.find(i => i.productId === p.id);
             return sum + (item?.qty || 0);
@@ -193,7 +208,7 @@ export default function AdminPage() {
             o.name,
             o.whatsapp,
             o.type,
-            formatItemDetail(o),
+            formatItemDetail(o, productMap),
             o.total,
             new Date(o.createdAt).toLocaleString("id-ID"),
             o.status,
@@ -284,10 +299,18 @@ export default function AdminPage() {
                                     <p className="text-gray-400 text-sm italic col-span-full">Belum ada varian yang terjual hari ini.</p>
                                 ) : (
                                     productStats.map(stat => (
-                                        <div key={stat.id} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <span className="text-2xl">{stat.emoji}</span>
-                                                <span className="font-bold text-gray-700">{stat.name}</span>
+                                        <div key={stat.id} className={`rounded-xl p-4 border transition-all ${stat.isAvailable ? 'bg-gray-50 border-gray-100' : 'bg-red-50 border-red-100 grayscale-[0.5]'}`}>
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-2xl">{stat.emoji}</span>
+                                                    <span className="font-bold text-gray-700">{stat.name}</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleToggleAvailability(stat.id, stat.isAvailable)}
+                                                    className={`text-[10px] px-2 py-1 rounded-lg font-black uppercase tracking-tighter transition-all ${stat.isAvailable ? 'bg-green-500 text-white shadow-sm' : 'bg-red-500 text-white'}`}
+                                                >
+                                                    {stat.isAvailable ? 'Ready' : 'Habis'}
+                                                </button>
                                             </div>
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex justify-between text-sm">
@@ -414,7 +437,7 @@ export default function AdminPage() {
                                                         </td>
                                                         <td className="px-4 py-3 text-gray-700 max-w-[250px]">
                                                             <div className="whitespace-pre-line text-xs leading-relaxed">
-                                                                {formatItemDetail(order)}
+                                                                {formatItemDetail(order, productMap)}
                                                             </div>
                                                         </td>
                                                         <td className="px-4 py-3 font-bold text-primary whitespace-nowrap">

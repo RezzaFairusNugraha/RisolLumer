@@ -6,6 +6,7 @@ export interface Product {
     color: string;
     price1: number;
     price3: number;
+    isAvailable?: boolean;
 }
 
 export const PRODUCTS: Product[] = [

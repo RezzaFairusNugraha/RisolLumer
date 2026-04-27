@@ -12,8 +12,9 @@ model Product {
   name      String
   emoji     String
   color     String
-  price1    Int
-  price3    Int
+  price1      Int
+  price3      Int
+  isAvailable Boolean     @default(true)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   orders    OrderItem[]

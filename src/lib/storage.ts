@@ -171,3 +171,29 @@ export async function deleteAffiliate(code: string): Promise<void> {
     }
 }
 
+
+// ===================== PRODUCTS =====================
+
+export async function getDbProducts(): Promise<any[]> {
+    try {
+        const res = await fetch("/api/products", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to fetch products");
+        return await res.json();
+    } catch (err) {
+        console.error("getDbProducts error:", err);
+        return [];
+    }
+}
+
+export async function updateProductAvailability(id: string, isAvailable: boolean): Promise<void> {
+    try {
+        const res = await fetch(`/api/products/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isAvailable }),
+        });
+        if (!res.ok) throw new Error("Failed to update product availability");
+    } catch (err) {
+        console.error("updateProductAvailability error:", err);
+    }
+}

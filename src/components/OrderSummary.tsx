@@ -11,7 +11,7 @@ interface OrderSummaryProps {
 }
 
 export default function OrderSummary({ order, affiliateCode, onClose }: OrderSummaryProps) {
-    const waLink = buildWhatsAppLink(order.code, order.total, order.name);
+    const waLink = buildWhatsAppLink(order);
 
     useEffect(() => {
         document.body.style.overflow = "hidden";

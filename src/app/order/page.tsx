@@ -12,9 +12,11 @@ import {
     getAffiliate,
     saveAffiliate,
     findAffiliateByWA,
+    getDbProducts,
 } from "@/lib/storage";
 import { generateOrderCode } from "@/lib/orderCode";
 import { generateAffiliateCode } from "@/lib/affiliateCode";
+import { useEffect } from "react";
 
 interface FormState {
     name: string;
@@ -39,6 +41,11 @@ export default function OrderPage() {
     const [referralMsg, setReferralMsg] = useState<string>("");
     const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
     const [newAffiliateCode, setNewAffiliateCode] = useState<string | undefined>();
+    const [dbProducts, setDbProducts] = useState<any[]>([]);
+
+    useEffect(() => {
+        getDbProducts().then(setDbProducts);
+    }, []);
 
     const validate = (): boolean => {
         const errs: Record<string, string> = {};
@@ -242,10 +249,13 @@ export default function OrderPage() {
                                 <div className="space-y-4">
                                     {PRODUCTS.map((prod) => {
                                         const item = form.items.find((i) => i.productId === prod.id)!;
+                                        const dbProd = dbProducts.find(p => p.slug === prod.id);
+                                        const isAvailable = dbProd ? dbProd.isAvailable : true;
+
                                         return (
                                             <div
                                                 key={prod.id}
-                                                className="border-2 border-gray-100 rounded-2xl p-4 hover:border-primary/30 transition-colors bg-white shadow-sm"
+                                                className={`border-2 rounded-2xl p-4 transition-all bg-white shadow-sm ${isAvailable ? 'border-gray-100 hover:border-primary/30' : 'border-red-100 bg-red-50/10 grayscale-[0.8]'}`}
                                             >
                                                 <div className="flex items-center gap-4 mb-4">
                                                     <div className="relative w-16 h-16 rounded-xl overflow-hidden shadow-md flex-shrink-0 bg-gray-100">
@@ -255,9 +265,19 @@ export default function OrderPage() {
                                                             fill
                                                             className="object-cover"
                                                         />
+                                                        {!isAvailable && (
+                                                            <div className="absolute inset-0 bg-red-500/60 backdrop-blur-[1px] flex items-center justify-center">
+                                                                <span className="text-[10px] font-black text-white uppercase tracking-tighter">Habis</span>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div>
-                                                        <p className="font-bold text-gray-800 text-lg">{prod.name}</p>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center justify-between">
+                                                            <p className="font-bold text-gray-800 text-lg">{prod.name}</p>
+                                                            {!isAvailable && (
+                                                                <span className="bg-red-100 text-red-600 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Stok Habis</span>
+                                                            )}
+                                                        </div>
                                                         <p className="text-xs text-gray-500">
                                                             Rp{prod.price1.toLocaleString("id-ID")} / Rp{prod.price3.toLocaleString("id-ID")}
                                                         </p>
@@ -283,8 +303,9 @@ export default function OrderPage() {
                                                         <button
                                                             type="button"
                                                             id={`qty-plus-${prod.id}`}
+                                                            disabled={!isAvailable}
                                                             onClick={() => updateItem(prod.id, "qty", item.qty + 1)}
-                                                            className="w-10 h-10 bg-primary text-white rounded-xl font-bold text-xl hover:bg-primary-dark shadow-md transition-all flex items-center justify-center min-h-[44px]"
+                                                            className={`w-10 h-10 rounded-xl font-bold text-xl shadow-md transition-all flex items-center justify-center min-h-[44px] ${isAvailable ? 'bg-primary text-white hover:bg-primary-dark' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
                                                         >
                                                             +
                                                         </button>

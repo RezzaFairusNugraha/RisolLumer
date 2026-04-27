@@ -1,14 +1,17 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/affiliates/[code]/route": "app/api/affiliates/[code]/route.js",
   "/api/affiliates/route": "app/api/affiliates/route.js",
   "/api/orders/[code]/route": "app/api/orders/[code]/route.js",
   "/api/orders/route": "app/api/orders/route.js",
+  "/api/products/[id]/route": "app/api/products/[id]/route.js",
+  "/api/products/route": "app/api/products/route.js",
   "/api/products/seed/route": "app/api/products/seed/route.js",
   "/afiliasi/login/page": "app/afiliasi/login/page.js",
   "/page": "app/page.js",
   "/risol-admin-2024/login/page": "app/risol-admin-2024/login/page.js",
-  "/afiliasi/page": "app/afiliasi/page.js",
   "/afiliasi/dashboard/page": "app/afiliasi/dashboard/page.js",
+  "/afiliasi/page": "app/afiliasi/page.js",
   "/order/page": "app/order/page.js",
   "/risol-admin-2024/page": "app/risol-admin-2024/page.js"
 }
