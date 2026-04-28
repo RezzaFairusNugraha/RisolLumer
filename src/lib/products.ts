@@ -29,8 +29,8 @@ export const PRODUCTS: Product[] = [
     { id: "mentai", name: "Risol Mentai", emoji: "🦑", image: "/img/RisolMentai.jpeg", color: "#faece7", price1: 5000, price3: 10000, flavorGroup: "mentai" },
 
     // ===== Mentah (Frozen) =====
-    { id: "matcha-mentah", name: "Risol Matcha (Mentah)", emoji: "🍵", image: "/img/RisolMatcha.jpeg", color: "#e8f5e9", price1: 3000, price3: 8000, isMentah: true, flavorGroup: "matcha", pricePerPack: 25000, qtyPerPack: 10 },
-    { id: "chocolate-mentah", name: "Risol Chocolate (Mentah)", emoji: "🍫", image: "/img/RisolCoklat.jpeg", color: "#faeeda", price1: 3000, price3: 8000, isMentah: true, flavorGroup: "chocolate", pricePerPack: 25000, qtyPerPack: 10 },
-    { id: "redvelvet-mentah", name: "Risol Red Velvet (Mentah)", emoji: "🎂", image: "/img/RisolRedvelvet.jpeg", color: "#fbeaf0", price1: 3000, price3: 8000, isMentah: true, flavorGroup: "redvelvet", pricePerPack: 25000, qtyPerPack: 10 },
-    { id: "mentai-mentah", name: "Risol Mentai (Mentah)", emoji: "🦑", image: "/img/RisolMentai.jpeg", color: "#faece7", price1: 3000, price3: 8000, isMentah: true, flavorGroup: "mentai", pricePerPack: 25000, qtyPerPack: 10 },
+    { id: "matcha-mentah", name: "Risol Matcha (Mentah)", emoji: "🍵", image: "/img/RisolMatcha.jpeg", color: "#e8f5e9", price1: 5000, price3: 10000, isMentah: true, flavorGroup: "matcha", pricePerPack: 35000, qtyPerPack: 10 },
+    { id: "chocolate-mentah", name: "Risol Chocolate (Mentah)", emoji: "🍫", image: "/img/RisolCoklat.jpeg", color: "#faeeda", price1: 5000, price3: 10000, isMentah: true, flavorGroup: "chocolate", pricePerPack: 35000, qtyPerPack: 10 },
+    { id: "redvelvet-mentah", name: "Risol Red Velvet (Mentah)", emoji: "🎂", image: "/img/RisolRedvelvet.jpeg", color: "#fbeaf0", price1: 5000, price3: 10000, isMentah: true, flavorGroup: "redvelvet", pricePerPack: 35000, qtyPerPack: 10 },
+    { id: "mentai-mentah", name: "Risol Mentai (Mentah)", emoji: "🦑", image: "/img/RisolMentai.jpeg", color: "#faece7", price1: 5000, price3: 10000, isMentah: true, flavorGroup: "mentai", pricePerPack: 35000, qtyPerPack: 10 },
 ];

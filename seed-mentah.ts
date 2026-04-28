@@ -11,10 +11,10 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
     const products = [
-        { slug: "matcha-mentah", name: "Risol Matcha (Mentah)", emoji: "🍵", color: "#e8f5e9", price1: 3000, price3: 8000 },
-        { slug: "chocolate-mentah", name: "Risol Chocolate (Mentah)", emoji: "🍫", color: "#faeeda", price1: 3000, price3: 8000 },
-        { slug: "redvelvet-mentah", name: "Risol Red Velvet (Mentah)", emoji: "🎂", color: "#fbeaf0", price1: 3000, price3: 8000 },
-        { slug: "mentai-mentah", name: "Risol Mentai (Mentah)", emoji: "🦑", color: "#faece7", price1: 3000, price3: 8000 },
+        { slug: "matcha-mentah", name: "Risol Matcha (Mentah)", emoji: "🍵", color: "#e8f5e9", price1: 5000, price3: 10000 },
+        { slug: "chocolate-mentah", name: "Risol Chocolate (Mentah)", emoji: "🍫", color: "#faeeda", price1: 5000, price3: 10000 },
+        { slug: "redvelvet-mentah", name: "Risol Red Velvet (Mentah)", emoji: "🎂", color: "#fbeaf0", price1: 5000, price3: 10000 },
+        { slug: "mentai-mentah", name: "Risol Mentai (Mentah)", emoji: "🦑", color: "#faece7", price1: 5000, price3: 10000 },
     ];
 
     for (const p of products) {
