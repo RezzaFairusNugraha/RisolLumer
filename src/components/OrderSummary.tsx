@@ -65,7 +65,6 @@ export default function OrderSummary({ order, affiliateCode, onClose }: OrderSum
                                         <div className="flex flex-col items-end">
                                             <span className="font-bold text-primary">
                                                 Rp{(() => {
-                                                    if (prod?.isMentah) return item.qty * (prod.pricePerPack ?? 25000);
                                                     const bundles = Math.floor(item.qty / 3);
                                                     const individual = item.qty % 3;
                                                     return (bundles * (prod?.price3 ?? 10000)) + (individual * (prod?.price1 ?? 5000));

@@ -39,34 +39,18 @@ export default function ProductCard({ product }: ProductCardProps) {
 
             {/* Prices */}
             <div className="w-full space-y-1">
-                {product.isMentah ? (
-                    <>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600 font-medium">Per Pack</span>
-                            <span className="font-bold text-blue-600">
-                                Rp{(product.pricePerPack ?? 25000).toLocaleString("id-ID")}
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-gray-400 font-medium italic">Isi {product.qtyPerPack ?? 10} pcs mentah</span>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600 font-medium">1 pcs</span>
-                            <span className="font-bold text-primary">
-                                Rp{product.price1.toLocaleString("id-ID")}
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600 font-medium">Isi 3</span>
-                            <span className="font-bold text-brown">
-                                Rp{product.price3.toLocaleString("id-ID")}
-                            </span>
-                        </div>
-                    </>
-                )}
+                <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600 font-medium">1 pcs</span>
+                    <span className="font-bold text-primary">
+                        Rp{product.price1.toLocaleString("id-ID")}
+                    </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600 font-medium">Isi 3</span>
+                    <span className="font-bold text-brown">
+                        Rp{product.price3.toLocaleString("id-ID")}
+                    </span>
+                </div>
             </div>
 
             {/* CTA */}

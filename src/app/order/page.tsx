@@ -74,15 +74,11 @@ export default function OrderPage() {
             if (item.qty === 0) continue;
             const prod = PRODUCTS.find(p => p.id === item.productId);
             if (!prod) continue;
-            if (prod.isMentah) {
-                // Mentah: dihitung per pack
-                total += item.qty * (prod.pricePerPack ?? 25000);
-            } else {
-                // Matang: bundle isi3 + satuan
-                const bundles = Math.floor(item.qty / 3);
-                const individual = item.qty % 3;
-                total += (bundles * prod.price3) + (individual * prod.price1);
-            }
+            
+            // Sama-sama pakai logika bundle isi 3 + satuan (berlaku untuk matang & mentah)
+            const bundles = Math.floor(item.qty / 3);
+            const individual = item.qty % 3;
+            total += (bundles * prod.price3) + (individual * prod.price1);
         }
         return total;
     };
@@ -97,7 +93,7 @@ export default function OrderPage() {
             .filter((i) => i.qty > 0)
             .map(i => {
                 const prod = PRODUCTS.find(p => p.id === i.productId);
-                return { ...i, packaging: (prod?.isMentah ? "isi3" : "1pcs") as Packaging };
+                return { ...i, packaging: (i.qty >= 3 ? "isi3" : "1pcs") as Packaging };
             });
 
         // Afiliasi hanya berlaku untuk risol matang >= 3 pcs
@@ -298,15 +294,13 @@ export default function OrderPage() {
                                                                 <span className="text-xs font-black bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full uppercase">🧊 Mentah</span>
                                                                 {!mentahAvail && <span className="text-xs font-black bg-red-100 text-red-500 px-2 py-0.5 rounded-full">Habis</span>}
                                                             </div>
-                                                            <p className="text-xs text-gray-500 mt-1">
-                                                                Rp{(mentahProd.pricePerPack ?? 25000).toLocaleString("id-ID")}/pack (isi {mentahProd.qtyPerPack ?? 10} pcs) · frozen
-                                                            </p>
+                                                            <p className="text-xs text-gray-500 mt-1">Rp5.000/pcs · Rp10.000/3 pcs (frozen)</p>
                                                         </div>
                                                         <div className="flex items-center gap-3">
                                                             <button type="button"
                                                                 id={`qty-minus-${mentahProd.id}`}
                                                                 onClick={() => updateItem(mentahProd.id, Math.max(0, mentahItem.qty - 1))}
-                                                                className="w-9 h-9 bg-white border-2 border-blue-200 rounded-xl font-bold hover:border-blue-400 transition-colors flex items-center justify-center min-h-[44px]">
+                                                                className="w-9 h-9 bg-white border-2 border-gray-200 rounded-xl font-bold hover:border-blue-400 transition-colors flex items-center justify-center min-h-[44px]">
                                                                 −
                                                             </button>
                                                             <span className="w-7 text-center font-black text-gray-800 text-lg">{mentahItem.qty}</span>
