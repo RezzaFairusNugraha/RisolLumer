@@ -59,15 +59,13 @@ function formatItemDetail(order: Order, productMap: Map<string, any>): string {
         .map((item) => {
             const prod = productMap.get(item.productId);
             
-            if (prod?.isMentah) {
-                return `${prod.emoji} ${prod.name.replace(" (Mentah)", "")} [${item.qty} pack] 🧊`;
-            }
-
-            // Matang logic
             const bundles = Math.floor(item.qty / 3);
             const satuan = item.qty % 3;
 
-            let detail = `${prod?.emoji ?? ""} ${prod?.name ?? item.productId}`;
+            let name = prod?.name ?? item.productId;
+            if (prod?.isMentah) name = name.replace(" (Mentah)", "");
+
+            let detail = `${prod?.emoji ?? ""} ${name}`;
             if (bundles > 0 && satuan > 0) {
                 detail += ` [${bundles} pkt + ${satuan} pcs]`;
             } else if (bundles > 0) {
@@ -75,6 +73,9 @@ function formatItemDetail(order: Order, productMap: Map<string, any>): string {
             } else {
                 detail += ` [${item.qty} pcs]`;
             }
+
+            if (prod?.isMentah) detail += " 🧊";
+            
             return detail;
         })
         .join("\n");
@@ -198,24 +199,16 @@ export default function AdminPage() {
             return sum + (item?.qty || 0);
         }, 0);
 
-        if (p.isMentah) {
-            return {
-                ...p,
-                totalQty: qty,
-                unit: "pack",
-                isMentah: true
-            };
-        }
-
         const bundles = Math.floor(qty / 3);
         const satuan = qty % 3;
+        
         return {
             ...p,
             totalQty: qty,
             bundles,
             satuan,
             unit: "pcs",
-            isMentah: false
+            isMentah: !!p.isMentah
         };
     }).filter(s => s.totalQty > 0);
 

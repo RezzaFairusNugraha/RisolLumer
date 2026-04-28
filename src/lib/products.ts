@@ -9,8 +9,6 @@ export interface Product {
     isAvailable?: boolean;
     isMentah?: boolean;          // true = produk frozen/mentah
     flavorGroup?: string;        // ID flavor induk, mis. "matcha"
-    pricePerPack?: number;       // harga per pack (khusus mentah)
-    qtyPerPack?: number;         // jumlah per pack
 }
 
 // Flavors yang tersedia

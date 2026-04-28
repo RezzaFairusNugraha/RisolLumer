@@ -14,6 +14,7 @@ export async function POST() {
                         color: p.color,
                         price1: p.price1,
                         price3: p.price3,
+                        isMentah: !!p.isMentah,
                     },
                     create: {
                         slug: p.id,
@@ -22,6 +23,7 @@ export async function POST() {
                         color: p.color,
                         price1: p.price1,
                         price3: p.price3,
+                        isMentah: !!p.isMentah,
                         isAvailable: true,
                     },
                 })

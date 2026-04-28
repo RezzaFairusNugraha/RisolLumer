@@ -117,6 +117,9 @@ export default function OrderPage() {
             }
         }
 
+        // Hapus Draft lama milik WA yang sama agar kode tidak numpuk
+        await fetch(`/api/orders/cleanup-draft?wa=${encodeURIComponent(form.whatsapp)}`, { method: "DELETE" });
+
         // Kirim ke server sebagai DRAFT dulu (supaya kode terpakai & tidak duplikat)
         const payload = {
             name: form.name,
@@ -353,13 +356,10 @@ export default function OrderPage() {
                                 <div className="space-y-2 mb-4">
                                     {form.items.filter((i) => i.qty > 0).map((item) => {
                                         const prod = PRODUCTS.find((p) => p.id === item.productId)!;
-                                        const itemTotal = prod.isMentah
-                                            ? item.qty * (prod.pricePerPack ?? 25000)
-                                            : (() => {
-                                                const b = Math.floor(item.qty / 3);
-                                                const s = item.qty % 3;
-                                                return b * prod.price3 + s * prod.price1;
-                                            })();
+                                        // Semua produk (matang & mentah) pakai bundle pricing: 3 for price3, else price1
+                                        const b = Math.floor(item.qty / 3);
+                                        const s = item.qty % 3;
+                                        const itemTotal = b * prod.price3 + s * prod.price1;
                                         return (
                                             <div key={item.productId} className="flex justify-between text-sm text-gray-700">
                                                 <span className="flex items-center gap-1">
@@ -368,7 +368,7 @@ export default function OrderPage() {
                                                     {prod.isMentah
                                                         ? <span className="text-[10px] bg-blue-100 text-blue-600 font-bold px-1 rounded">mentah</span>
                                                         : <span className="text-[10px] bg-orange-100 text-orange-600 font-bold px-1 rounded">matang</span>}
-                                                    <span className="text-gray-500">×{item.qty}{prod.isMentah ? " pack" : " pcs"}</span>
+                                                    <span className="text-gray-500">×{item.qty} pcs</span>
                                                 </span>
                                                 <span className="font-bold">Rp{itemTotal.toLocaleString("id-ID")}</span>
                                             </div>
