@@ -175,6 +175,7 @@ export default function AdminPage() {
 
     // Filtered orders (Time filter first)
     const timeFiltered = orders.filter((o) => {
+        if (o.status === "Draft") return false;
         if (filterTime === "all") return true;
         const today = new Date().toLocaleDateString('en-CA');
         const orderDate = new Date(o.createdAt).toLocaleDateString('en-CA');

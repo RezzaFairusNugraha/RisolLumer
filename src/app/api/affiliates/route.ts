@@ -16,6 +16,7 @@ export async function GET() {
                 ownerName: a.ownerName,
                 ownerWA: a.ownerWA,
                 usedBy: a.usedBy,
+                totalSold: a.totalSold,
                 rewardClaimed: a.rewardClaimed
             };
         });
@@ -30,7 +31,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const data = await req.json();
-        const { code, ownerName, ownerWA, usedBy, rewardClaimed } = data;
+        const { code, ownerName, ownerWA, usedBy, totalSold, rewardClaimed } = data;
 
         const affiliate = await prisma.affiliate.upsert({
             where: { code },
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
                 ownerName,
                 ownerWA,
                 usedBy,
+                totalSold,
                 rewardClaimed,
             },
             create: {
@@ -45,6 +47,7 @@ export async function POST(req: Request) {
                 ownerName,
                 ownerWA,
                 usedBy: usedBy || [],
+                totalSold: totalSold || 0,
                 rewardClaimed: rewardClaimed || false,
             },
         });

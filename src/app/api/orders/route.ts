@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { generateOrderCode } from "@/lib/orderCode";
+import { OrderItem } from "@/lib/storage";
 
 export async function GET() {
     try {
@@ -22,7 +23,7 @@ export async function GET() {
 export async function POST(req: Request) {
     try {
         const data = await req.json();
-        const { name, whatsapp, type, kelas, items, referralCode, affiliateCode, total } = data;
+        const { name, whatsapp, type, kelas, items, referralCode, affiliateCode, total, status } = data;
 
         // Resolve product slugs to IDs
         const products = await prisma.product.findMany();
@@ -45,9 +46,9 @@ export async function POST(req: Request) {
                         total,
                         referralCode,
                         affiliateCode,
-                        status: "Baru",
+                        status: status || "Baru",
                         items: {
-                            create: await Promise.all(items.map(async (item: any) => {
+                            create: await Promise.all(items.map(async (item: OrderItem) => {
                                 let resolvedId = productSlugMap.get(item.productId);
 
                                 // If not found in map, try looking it up directly by slug

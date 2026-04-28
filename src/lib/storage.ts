@@ -1,4 +1,4 @@
-export type OrderStatus = "Baru" | "Diproses" | "Selesai" | "Dibatalkan";
+export type OrderStatus = "Draft" | "Baru" | "Diproses" | "Selesai" | "Dibatalkan";
 export type OrderType = "ambil" | "antar";
 export type Packaging = "1pcs" | "isi3";
 
@@ -26,6 +26,7 @@ export interface AffiliateData {
     ownerName: string;
     ownerWA: string;
     usedBy: string[]; // array of unique WA numbers that used this code
+    totalSold: number;
     rewardClaimed: boolean;
 }
 

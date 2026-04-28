@@ -117,25 +117,7 @@ export default function OrderPage() {
             }
         }
 
-        // Dapatkan kode order dari server (tanpa simpan dulu)
-        const codeRes = await fetch("/api/orders/code");
-        const { code } = await codeRes.json();
-
-        const order: Order = {
-            code,
-            name: form.name,
-            whatsapp: form.whatsapp,
-            type: tab,
-            kelas: tab === "antar" ? form.kelas : undefined,
-            items: activeItems,
-            referralCode: form.referralCode.trim() || undefined,
-            affiliateCode: affCode,
-            total,
-            status: "Baru",
-            createdAt: new Date().toISOString(),
-        };
-
-        // Kirim ke server — server yang generate kode order
+        // Kirim ke server sebagai DRAFT dulu (supaya kode terpakai & tidak duplikat)
         const payload = {
             name: form.name,
             whatsapp: form.whatsapp,
@@ -145,12 +127,27 @@ export default function OrderPage() {
             referralCode: form.referralCode.trim() || undefined,
             affiliateCode: affCode,
             total,
+            status: "Draft" as const
         };
 
-        // Simpan payload untuk dikirim nanti saat klik WA
-        (window as any)._pendingOrder = {
-            ...payload,
-            code // Sertakan kode yang sudah didapat
+        const res = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            console.error("Order failed:", err);
+            alert("Gagal membuat pesanan. Coba lagi.");
+            return;
+        }
+
+        const savedOrder = await res.json();
+
+        const order: Order = {
+            ...savedOrder,
+            items: activeItems, // pastikan items ada di object
         };
 
         setSubmittedOrder(order);

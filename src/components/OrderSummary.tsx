@@ -112,20 +112,16 @@ export default function OrderSummary({ order, affiliateCode, onClose }: OrderSum
                     <button
                         id="confirm-wa-btn"
                         onClick={async () => {
-                            const pending = (window as any)._pendingOrder;
-                            if (pending) {
-                                try {
-                                    await fetch("/api/orders", {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify(pending),
-                                    });
-                                    // Trigger event for any listeners (like admin dashboard if open in same session)
-                                    window.dispatchEvent(new CustomEvent("newOrder", { detail: order }));
-                                    delete (window as any)._pendingOrder;
-                                } catch (err) {
-                                    console.error("Final order save failed:", err);
-                                }
+                            try {
+                                await fetch(`/api/orders/${order.code}`, {
+                                    method: "PATCH",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ status: "Baru" }),
+                                });
+                                // Trigger event for any listeners (like admin dashboard if open in same session)
+                                window.dispatchEvent(new CustomEvent("newOrder", { detail: order }));
+                            } catch (err) {
+                                console.error("Final order confirmation failed:", err);
                             }
                             window.open(waLink, "_blank");
                         }}
