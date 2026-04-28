@@ -14,6 +14,7 @@ model Product {
   color     String
   price1      Int
   price3      Int
+  isMentah    Boolean     @default(false)
   isAvailable Boolean     @default(true)
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
@@ -52,6 +53,7 @@ model Affiliate {
   ownerName     String
   ownerWA       String
   usedBy        String[] @default([])
+  totalSold     Int      @default(0)
   rewardClaimed Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

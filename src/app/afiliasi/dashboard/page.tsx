@@ -43,7 +43,7 @@ export default function AffiliateDashboard() {
 
     if (!mounted || !afilCode || !afilData) return null;
 
-    const count = afilData.usedBy.length;
+    const count = afilData.totalSold || 0;
     const pct = Math.min((count / 5) * 100, 100);
     const waLink = buildRewardClaimLink(afilData.ownerName, afilCode);
 
@@ -90,7 +90,7 @@ export default function AffiliateDashboard() {
                             <h2 className="text-lg font-black text-gray-800 mb-4">🎁 Progress Reward</h2>
                             <div className="flex justify-between items-end mb-2">
                                 <span className="text-3xl font-black text-primary">{count}<span className="text-gray-300 text-xl">/5</span></span>
-                                <span className="text-sm font-bold text-gray-500">{5 - count} teman lagi</span>
+                                <span className="text-sm font-bold text-gray-500">{count >= 5 ? "Tercapai!" : `${5 - count} risol lagi`}</span>
                             </div>
                             <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden mb-4">
                                 <div
@@ -100,8 +100,8 @@ export default function AffiliateDashboard() {
                             </div>
                             <p className="text-xs text-gray-600 text-center italic">
                                 {count >= 5
-                                    ? "🎉 Selamat! Kamu sudah bisa klaim 3 risol gratis."
-                                    : "Ayo ajak temanmu order Resol Lumer isi 3!"}
+                                    ? "🎉 Selamat! Kamu sudah bisa klaim 1 risol gratis."
+                                    : "Ayo ajak temanmu order Resol Lumer!"}
                             </p>
 
                             {count >= 5 && !afilData.rewardClaimed && (

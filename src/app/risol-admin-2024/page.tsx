@@ -58,7 +58,12 @@ function formatItemDetail(order: Order, productMap: Map<string, any>): string {
     return order.items
         .map((item) => {
             const prod = productMap.get(item.productId);
-            // Calculate bundles for this item
+            
+            if (prod?.isMentah) {
+                return `${prod.emoji} ${prod.name.replace(" (Mentah)", "")} [${item.qty} pack] 🧊`;
+            }
+
+            // Matang logic
             const bundles = Math.floor(item.qty / 3);
             const satuan = item.qty % 3;
 
@@ -191,13 +196,25 @@ export default function AdminPage() {
             const item = o.items?.find(i => i.productId === p.id);
             return sum + (item?.qty || 0);
         }, 0);
+
+        if (p.isMentah) {
+            return {
+                ...p,
+                totalQty: qty,
+                unit: "pack",
+                isMentah: true
+            };
+        }
+
         const bundles = Math.floor(qty / 3);
         const satuan = qty % 3;
         return {
             ...p,
             totalQty: qty,
             bundles,
-            satuan
+            satuan,
+            unit: "pcs",
+            isMentah: false
         };
     }).filter(s => s.totalQty > 0);
 
@@ -333,7 +350,12 @@ export default function AdminPage() {
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-2xl">{stat.emoji}</span>
-                                                    <span className="font-bold text-gray-700">{stat.name}</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-gray-700 leading-tight">
+                                                            {stat.isMentah ? stat.name.replace(" (Mentah)", "") : stat.name}
+                                                        </span>
+                                                        {stat.isMentah && <span className="text-[10px] text-blue-500 font-black uppercase">Frozen 🧊</span>}
+                                                    </div>
                                                 </div>
                                                 <button
                                                     onClick={() => handleToggleAvailability(stat.id, stat.isAvailable)}
@@ -345,16 +367,27 @@ export default function AdminPage() {
                                             <div className="flex flex-col gap-1">
                                                 <div className="flex justify-between text-sm">
                                                     <span className="text-gray-500">Total:</span>
-                                                    <span className="font-black text-primary">{stat.totalQty} pcs</span>
+                                                    <span className={`font-black ${stat.isMentah ? 'text-blue-600' : 'text-primary'}`}>
+                                                        {stat.totalQty} {stat.unit}
+                                                    </span>
                                                 </div>
-                                                <div className="flex justify-between text-xs">
-                                                    <span className="text-gray-400">Paket (3):</span>
-                                                    <span className="font-bold text-orange-600">{stat.bundles} pkt</span>
-                                                </div>
-                                                <div className="flex justify-between text-xs">
-                                                    <span className="text-gray-400">Satuan:</span>
-                                                    <span className="font-bold text-blue-600">{stat.satuan} pcs</span>
-                                                </div>
+                                                {!stat.isMentah && (
+                                                    <>
+                                                        <div className="flex justify-between text-xs">
+                                                            <span className="text-gray-400">Paket (3):</span>
+                                                            <span className="font-bold text-orange-600">{stat.bundles} pkt</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-xs">
+                                                            <span className="text-gray-400">Satuan:</span>
+                                                            <span className="font-bold text-blue-600">{stat.satuan} pcs</span>
+                                                        </div>
+                                                    </>
+                                                )}
+                                                {stat.isMentah && (
+                                                    <div className="text-[10px] text-gray-400 italic mt-1">
+                                                        * 1 pack = 10 pcs mentah
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))
@@ -543,7 +576,7 @@ export default function AdminPage() {
                                         <th className="px-6 py-4 font-black">Kode</th>
                                         <th className="px-6 py-4 font-black">Nama Owner</th>
                                         <th className="px-6 py-4 font-black">WhatsApp</th>
-                                        <th className="px-6 py-4 font-black">Referral</th>
+                                        <th className="px-6 py-4 font-black">Poin (Risol Terjual)</th>
                                         <th className="px-6 py-4 font-black">Status Hadiah</th>
                                         <th className="px-6 py-4 font-black">Aksi</th>
                                     </tr>
@@ -556,8 +589,8 @@ export default function AdminPage() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        Object.entries(affiliates).map(([code, data]) => {
-                                            const count = data.usedBy.length;
+                                        Object.entries(affiliates).map(([code, data]: [string, any]) => {
+                                            const count = data.totalSold || 0;
                                             const canClaim = count >= 5;
                                             return (
                                                 <tr key={code} className="hover:bg-gray-50 transition-colors">

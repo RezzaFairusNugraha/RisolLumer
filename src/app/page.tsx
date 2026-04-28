@@ -80,7 +80,23 @@ export default function HomePage() {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {PRODUCTS.map((product) => (
+                    {PRODUCTS.filter((p) => !p.isMentah).map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
+                </div>
+
+                {/* ===== MENTAH / FROZEN ===== */}
+                <div className="text-center mt-20 mb-10">
+                    <h2 className="text-3xl sm:text-4xl font-black text-gray-800 mb-3">
+                        Risol Mentah (Frozen) ❄️
+                    </h2>
+                    <p className="text-gray-600 max-w-md mx-auto">
+                        Ingin stok di rumah? Tersedia varian mentah yang siap goreng kapan saja!
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {PRODUCTS.filter((p) => p.isMentah).map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
@@ -117,8 +133,8 @@ export default function HomePage() {
                 <div className="bg-gradient-to-br from-primary to-primary-dark rounded-3xl p-8 text-white text-center">
                     <h2 className="text-3xl font-black mb-3">💰 Program Afiliasi</h2>
                     <p className="text-white/80 mb-6 max-w-md mx-auto">
-                        Beli risol isi 3 dan dapat kode afiliasi! Ajak 5 teman pakai kodemu dan
-                        dapatkan <strong>3 risol gratis pilihan kamu</strong> 🎉
+                        Beli risol matang dan dapatkan kode afiliasi! Tiap 5 risol yang terjual pakai kodemu,
+                        kamu dapatkan <strong>1 risol gratis pilihan kamu</strong> 🎉
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/order" className="bg-white text-primary font-black py-3 px-8 rounded-2xl hover:bg-cream transition-colors">

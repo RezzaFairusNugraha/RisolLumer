@@ -62,9 +62,16 @@ export default function OrderSummary({ order, affiliateCode, onClose }: OrderSum
                                             <span className="font-bold text-gray-800">{prod?.name}</span>
                                             <span className="text-gray-400">×{item.qty}</span>
                                         </div>
-                                        <span className="text-gray-500 line-through text-[10px] mr-1">
-                                            Rp{(item.qty * 5000).toLocaleString("id-ID")}
-                                        </span>
+                                        <div className="flex flex-col items-end">
+                                            <span className="font-bold text-primary">
+                                                Rp{(() => {
+                                                    if (prod?.isMentah) return item.qty * (prod.pricePerPack ?? 25000);
+                                                    const bundles = Math.floor(item.qty / 3);
+                                                    const individual = item.qty % 3;
+                                                    return (bundles * (prod?.price3 ?? 10000)) + (individual * (prod?.price1 ?? 5000));
+                                                })().toLocaleString("id-ID")}
+                                            </span>
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -91,7 +98,7 @@ export default function OrderSummary({ order, affiliateCode, onClose }: OrderSum
                             <p className="text-xs font-bold text-yellow-700 mb-1">🎉 Kamu dapat Kode Afiliasi!</p>
                             <p className="text-2xl font-black text-yellow-600 tracking-widest">{affiliateCode}</p>
                             <p className="text-xs text-yellow-600 mt-1">
-                                Bagikan ke teman-temanmu. Jika 5 orang order pakai kodemu, kamu dapat 3 risol gratis!
+                                Bagikan ke teman-temanmu. Tiap 5 risol yang terjual pakai kodemu, kamu dapat 1 risol gratis!
                             </p>
                         </div>
                     )}
@@ -103,16 +110,31 @@ export default function OrderSummary({ order, affiliateCode, onClose }: OrderSum
                     </div>
 
                     {/* WA Button */}
-                    <a
+                    <button
                         id="confirm-wa-btn"
-                        href={waLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={async () => {
+                            const pending = (window as any)._pendingOrder;
+                            if (pending) {
+                                try {
+                                    await fetch("/api/orders", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify(pending),
+                                    });
+                                    // Trigger event for any listeners (like admin dashboard if open in same session)
+                                    window.dispatchEvent(new CustomEvent("newOrder", { detail: order }));
+                                    delete (window as any)._pendingOrder;
+                                } catch (err) {
+                                    console.error("Final order save failed:", err);
+                                }
+                            }
+                            window.open(waLink, "_blank");
+                        }}
                         className="btn-primary flex items-center justify-center gap-2 w-full text-center"
                     >
                         <span>💬</span>
                         Konfirmasi via WhatsApp
-                    </a>
+                    </button>
 
                     <button
                         onClick={onClose}

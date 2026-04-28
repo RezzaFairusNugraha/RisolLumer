@@ -1,9 +1,9 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/api/affiliates/[code]/route": "app/api/affiliates/[code]/route.js",
+  "/api/affiliates/route": "app/api/affiliates/route.js",
   "/api/orders/[code]/route": "app/api/orders/[code]/route.js",
   "/api/orders/route": "app/api/orders/route.js",
-  "/api/affiliates/route": "app/api/affiliates/route.js",
   "/api/products/[id]/route": "app/api/products/[id]/route.js",
   "/api/products/route": "app/api/products/route.js",
   "/api/products/seed/route": "app/api/products/seed/route.js",
