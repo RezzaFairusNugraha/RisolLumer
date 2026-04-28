@@ -17,6 +17,12 @@ export default function AfiliasiPage() {
     const [notFound, setNotFound] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
 
+    // Search by WA states
+    const [searchWA, setSearchWA] = useState("");
+    const [searchResult, setSearchResult] = useState<string | null>(null);
+    const [searchError, setSearchError] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+
     const handleCheck = async () => {
         const trimmed = code.trim().toUpperCase();
         if (!trimmed) return;
@@ -31,6 +37,27 @@ export default function AfiliasiPage() {
         const count = aff.usedBy.length;
         setResult({ ownerName: aff.ownerName, count, rewardClaimed: aff.rewardClaimed });
         setShowConfetti(count >= 5);
+    };
+
+    const handleSearchByWA = async () => {
+        if (!searchWA.trim()) return;
+        setIsSearching(true);
+        setSearchError("");
+        setSearchResult(null);
+
+        try {
+            const res = await fetch(`/api/affiliates/find-by-wa?wa=${encodeURIComponent(searchWA)}`);
+            const data = await res.json();
+            if (res.ok) {
+                setSearchResult(data.code);
+            } else {
+                setSearchError(data.error || "Gagal mencari kode");
+            }
+        } catch (err) {
+            setSearchError("Terjadi kesalahan sistem");
+        } finally {
+            setIsSearching(false);
+        }
     };
 
     const pct = result ? Math.min((result.count / 5) * 100, 100) : 0;
@@ -56,7 +83,7 @@ export default function AfiliasiPage() {
                 <div className="text-center mb-10">
                     <h1 className="text-3xl sm:text-4xl font-black text-gray-800 mb-2">Program Afiliasi 🎁</h1>
                     <p className="text-gray-600">
-                        Ajak 5 teman beli isi 3 pakai kodemu dan dapat <strong>3 risol gratis!</strong>
+                        Setiap <strong>5 risol</strong> yang terjual pakai kodemu, kamu dapat <strong>1 risol gratis!</strong>
                     </p>
                 </div>
 
@@ -88,6 +115,48 @@ export default function AfiliasiPage() {
                     </div>
                     {notFound && (
                         <p className="text-red-500 text-sm mt-3 font-medium">❌ Kode tidak ditemukan. Pastikan kamu sudah beli isi 3!</p>
+                    )}
+                </div>
+                {/* Search by WA */}
+                <div className="card p-6 mb-6 bg-gray-50 border-dashed border-2 border-gray-200">
+                    <h3 className="text-sm font-bold text-gray-500 mb-3 flex items-center gap-2">
+                        <span>🔍</span> Lupa Kode Afiliasi?
+                    </h3>
+                    <div className="flex gap-3">
+                        <input
+                            type="tel"
+                            className="input-field flex-1"
+                            placeholder="Masukkan No. WhatsApp kamu"
+                            value={searchWA}
+                            onChange={(e) => setSearchWA(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSearchByWA()}
+                        />
+                        <button
+                            onClick={handleSearchByWA}
+                            disabled={isSearching}
+                            className="btn-outline px-4 py-2 text-sm whitespace-nowrap bg-white"
+                        >
+                            {isSearching ? "..." : "Cari Kode"}
+                        </button>
+                    </div>
+                    {searchResult && (
+                        <div className="mt-4 p-4 bg-primary/10 rounded-xl animate-bounce-subtle border border-primary/20">
+                            <p className="text-xs text-primary font-bold uppercase">Kode Kamu Ditemukan! 🎉</p>
+                            <p className="text-2xl font-black text-gray-800 tracking-widest">{searchResult}</p>
+                            <button 
+                                onClick={() => {
+                                    setCode(searchResult);
+                                    setSearchResult(null);
+                                    setSearchWA("");
+                                }}
+                                className="text-xs text-primary underline mt-1 font-bold"
+                            >
+                                Gunakan kode ini untuk cek progress ↑
+                            </button>
+                        </div>
+                    )}
+                    {searchError && (
+                        <p className="text-red-500 text-xs mt-2 font-medium">❌ {searchError}</p>
                     )}
                 </div>
 
@@ -142,7 +211,7 @@ export default function AfiliasiPage() {
                                 </>
                             ) : (
                                 <p className="font-bold text-yellow-700">
-                                    🔥 Tinggal {5 - result.count} orang lagi, kamu dapat 3 risol gratis!
+                                    🔥 Tinggal {5 - result.count} risol lagi, kamu dapat 1 risol gratis!
                                 </p>
                             )}
                         </div>
@@ -168,7 +237,7 @@ export default function AfiliasiPage() {
                     <ol className="space-y-2 text-sm text-gray-700">
                         <li className="flex gap-2">
                             <span className="text-primary font-bold">1.</span>
-                            <span>Beli risol <strong>isi 3</strong> dan kamu dapat kode afiliasi unik</span>
+                            <span>Setiap pembelian <strong>isi 3</strong> kamu akan mendapatkan kode afiliasi unik</span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-primary font-bold">2.</span>
@@ -176,11 +245,11 @@ export default function AfiliasiPage() {
                         </li>
                         <li className="flex gap-2">
                             <span className="text-primary font-bold">3.</span>
-                            <span>Teman input kodemu saat order <strong>isi 3</strong></span>
+                            <span>Teman input kodemu saat order (per risol dihitung 1 poin)</span>
                         </li>
                         <li className="flex gap-2">
                             <span className="text-primary font-bold">4.</span>
-                            <span>Jika 5 teman berbeda pakai kodemu, kamu dapat <strong>3 risol gratis!</strong></span>
+                            <span>Jika sudah terkumpul 5 risol, kamu dapat <strong>1 risol gratis!</strong></span>
                         </li>
                     </ol>
                 </div>
