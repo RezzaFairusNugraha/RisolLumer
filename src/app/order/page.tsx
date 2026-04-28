@@ -70,18 +70,28 @@ export default function OrderPage() {
     };
 
     const calcTotal = (): number => {
-        let total = 0;
+        let matangQty = 0;
+        let mentahQty = 0;
+
         for (const item of form.items) {
             if (item.qty === 0) continue;
             const prod = PRODUCTS.find(p => p.id === item.productId);
             if (!prod) continue;
             
-            // Sama-sama pakai logika bundle isi 3 + satuan (berlaku untuk matang & mentah)
-            const bundles = Math.floor(item.qty / 3);
-            const individual = item.qty % 3;
-            total += (bundles * prod.price3) + (individual * prod.price1);
+            if (prod.isMentah) {
+                mentahQty += item.qty;
+            } else {
+                matangQty += item.qty;
+            }
         }
-        return total;
+
+        const calculateGroupTotal = (qty: number) => {
+            const bundles = Math.floor(qty / 3);
+            const individual = qty % 3;
+            return (bundles * 10000) + (individual * 5000);
+        };
+
+        return calculateGroupTotal(matangQty) + calculateGroupTotal(mentahQty);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -361,10 +371,7 @@ export default function OrderPage() {
                                 <div className="space-y-2 mb-4">
                                     {form.items.filter((i) => i.qty > 0).map((item) => {
                                         const prod = PRODUCTS.find((p) => p.id === item.productId)!;
-                                        // Semua produk (matang & mentah) pakai bundle pricing: 3 for price3, else price1
-                                        const b = Math.floor(item.qty / 3);
-                                        const s = item.qty % 3;
-                                        const itemTotal = b * prod.price3 + s * prod.price1;
+                                        const itemSubtotal = item.qty * 5000;
                                         return (
                                             <div key={item.productId} className="flex justify-between text-sm text-gray-700">
                                                 <span className="flex items-center gap-1">
@@ -375,10 +382,25 @@ export default function OrderPage() {
                                                         : <span className="text-[10px] bg-orange-100 text-orange-600 font-bold px-1 rounded">matang</span>}
                                                     <span className="text-gray-500">×{item.qty} pcs</span>
                                                 </span>
-                                                <span className="font-bold">Rp{itemTotal.toLocaleString("id-ID")}</span>
+                                                <span className="font-bold">Rp{itemSubtotal.toLocaleString("id-ID")}</span>
                                             </div>
                                         );
                                     })}
+                                    {(() => {
+                                        const matangQty = form.items.filter(i => !PRODUCTS.find(p => p.id === i.productId)?.isMentah).reduce((s, i) => s + i.qty, 0);
+                                        const mentahQty = form.items.filter(i => PRODUCTS.find(p => p.id === i.productId)?.isMentah).reduce((s, i) => s + i.qty, 0);
+                                        const totalDiscount = (Math.floor(matangQty / 3) * 5000) + (Math.floor(mentahQty / 3) * 5000);
+                                        
+                                        if (totalDiscount > 0) {
+                                            return (
+                                                <div className="flex justify-between text-sm text-green-600 font-bold pt-1 border-t border-gray-100">
+                                                    <span>✨ Promo Mix & Match</span>
+                                                    <span>-Rp{totalDiscount.toLocaleString("id-ID")}</span>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
                                     {form.items.every((i) => i.qty === 0) && (
                                         <p className="text-gray-400 text-sm text-center py-2">Belum ada produk dipilih</p>
                                     )}
