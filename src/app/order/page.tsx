@@ -73,25 +73,20 @@ export default function OrderPage() {
         let matangQty = 0;
         let mentahQty = 0;
 
-        for (const item of form.items) {
-            if (item.qty === 0) continue;
-            const prod = PRODUCTS.find(p => p.id === item.productId);
-            if (!prod) continue;
-            
-            if (prod.isMentah) {
+        form.items.forEach(item => {
+            if (item.qty <= 0) return;
+            // Robust check: if ID ends with -mentah, it's frozen
+            if (item.productId.endsWith("-mentah")) {
                 mentahQty += item.qty;
             } else {
                 matangQty += item.qty;
             }
-        }
+        });
 
-        const calculateGroupTotal = (qty: number) => {
-            const bundles = Math.floor(qty / 3);
-            const individual = qty % 3;
-            return (bundles * 10000) + (individual * 5000);
-        };
+        const matangPrice = (matangQty * 5000) - (Math.floor(matangQty / 3) * 5000);
+        const mentahPrice = (mentahQty * 5000) - (Math.floor(mentahQty / 3) * 5000);
 
-        return calculateGroupTotal(matangQty) + calculateGroupTotal(mentahQty);
+        return matangPrice + mentahPrice;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -387,8 +382,14 @@ export default function OrderPage() {
                                         );
                                     })}
                                     {(() => {
-                                        const matangQty = form.items.filter(i => !PRODUCTS.find(p => p.id === i.productId)?.isMentah).reduce((s, i) => s + i.qty, 0);
-                                        const mentahQty = form.items.filter(i => PRODUCTS.find(p => p.id === i.productId)?.isMentah).reduce((s, i) => s + i.qty, 0);
+                                        let matangQty = 0;
+                                        let mentahQty = 0;
+                                        form.items.forEach(item => {
+                                            if (item.qty <= 0) return;
+                                            if (item.productId.endsWith("-mentah")) mentahQty += item.qty;
+                                            else matangQty += item.qty;
+                                        });
+
                                         const totalDiscount = (Math.floor(matangQty / 3) * 5000) + (Math.floor(mentahQty / 3) * 5000);
                                         
                                         if (totalDiscount > 0) {
@@ -413,7 +414,7 @@ export default function OrderPage() {
                                 </div>
 
                                 <div className="mt-4 bg-yellow-400/20 border-2 border-yellow-400 rounded-2xl p-4 text-xs text-yellow-800 font-black uppercase tracking-widest text-center animate-pulse">
-                                    🎁 Promo: Beli 3 Matang (Varian Sama) Cuma Rp10.000!
+                                    🎁 Promo: Beli 3 (Bebas Mix Rasa) Cuma Rp10.000!
                                 </div>
 
                                 <button
