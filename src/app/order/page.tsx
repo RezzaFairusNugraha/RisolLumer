@@ -112,6 +112,7 @@ export default function OrderPage() {
                     ownerName: form.name,
                     ownerWA: form.whatsapp,
                     usedBy: [],
+                    totalSold: 0,
                     rewardClaimed: false,
                 });
             }
