@@ -33,7 +33,7 @@ export async function POST(req: Request) {
         // Retry up to 5 times on unique constraint violation (P2002)
         let order;
         let retries = 0;
-        while (retries < 5) {
+        while (retries < 10) {
             const code = await generateOrderCode();
             try {
                 order = await prisma.order.create({
@@ -74,10 +74,12 @@ export async function POST(req: Request) {
                 });
                 break; // success
             } catch (err: any) {
-                if (err.code === "P2002" && retries < 4) {
+                if (err.code === "P2002" && retries < 9) {
                     // Unique constraint on code — retry with next sequence number
                     retries++;
-                    console.warn(`Order code conflict, retrying (${retries}/5)...`);
+                    console.warn(`Order code conflict, retrying (${retries}/10)...`);
+                    // Small random delay to stagger concurrent requests
+                    await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
                     continue;
                 }
                 throw err;

@@ -10,15 +10,29 @@ export async function generateOrderCode(): Promise<string> {
     const dateStr = `${year}${month}${day}`;
     const todayPrefix = `RL-${dateStr}-`;
 
-    // Count from DB atomically to avoid race conditions
-    const count = await prisma.order.count({
+    // Find the latest order code for today
+    const latestOrder = await prisma.order.findFirst({
         where: {
             code: {
                 startsWith: todayPrefix,
             },
         },
+        orderBy: {
+            code: "desc",
+        },
+        select: {
+            code: true,
+        },
     });
 
-    const seq = String(count + 1).padStart(3, "0");
+    let nextNumber = 1;
+    if (latestOrder) {
+        const lastSeq = parseInt(latestOrder.code.split("-")[2]);
+        if (!isNaN(lastSeq)) {
+            nextNumber = lastSeq + 1;
+        }
+    }
+
+    const seq = String(nextNumber).padStart(3, "0");
     return `${todayPrefix}${seq}`;
 }

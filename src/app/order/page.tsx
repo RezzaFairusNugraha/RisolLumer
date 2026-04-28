@@ -38,6 +38,7 @@ export default function OrderPage() {
     const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
     const [newAffiliateCode, setNewAffiliateCode] = useState<string | undefined>();
     const [dbProducts, setDbProducts] = useState<any[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         getDbProducts().then(setDbProducts);
@@ -86,6 +87,7 @@ export default function OrderPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
+        setIsSubmitting(true);
 
         const total = calcTotal();
 
@@ -144,10 +146,12 @@ export default function OrderPage() {
             const err = await res.json();
             console.error("Order failed:", err);
             alert("Gagal membuat pesanan. Coba lagi.");
+            setIsSubmitting(false);
             return;
         }
 
         const savedOrder = await res.json();
+        setIsSubmitting(false);
 
         const order: Order = {
             ...savedOrder,
@@ -393,8 +397,9 @@ export default function OrderPage() {
                                 <button
                                     id="submit-order-btn"
                                     type="submit"
-                                    className="btn-primary w-full mt-5 text-base">
-                                    ✅ Konfirmasi Order
+                                    disabled={isSubmitting}
+                                    className={`btn-primary w-full mt-5 text-base ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}>
+                                    {isSubmitting ? "⏳ Memproses..." : "✅ Konfirmasi Order"}
                                 </button>
                             </div>
                         </div>
