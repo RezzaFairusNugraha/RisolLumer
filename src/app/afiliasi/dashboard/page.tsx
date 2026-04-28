@@ -88,32 +88,53 @@ export default function AffiliateDashboard() {
 
                         <div className="card p-6">
                             <h2 className="text-lg font-black text-gray-800 mb-4">🎁 Progress Reward</h2>
-                            <div className="flex justify-between items-end mb-2">
-                                <span className="text-3xl font-black text-primary">{count}<span className="text-gray-300 text-xl">/5</span></span>
-                                <span className="text-sm font-bold text-gray-500">{count >= 5 ? "Tercapai!" : `${5 - count} risol lagi`}</span>
-                            </div>
-                            <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden mb-4">
-                                <div
-                                    className="h-full bg-gradient-to-r from-primary to-primary-dark rounded-full transition-all duration-1000"
-                                    style={{ width: `${pct}%` }}
-                                />
-                            </div>
-                            <p className="text-xs text-gray-600 text-center italic">
-                                {count >= 5
-                                    ? "🎉 Selamat! Kamu sudah bisa klaim 1 risol gratis."
-                                    : "Ayo ajak temanmu order Resol Lumer!"}
-                            </p>
+                            {(() => {
+                                const totalEarned = Math.floor(afilData.totalSold / 6);
+                                const readyToClaim = Math.max(0, totalEarned - (afilData.claimedCount || 0));
+                                const progress = afilData.totalSold % 6;
+                                const pct = (progress / 6) * 100;
+                                
+                                return (
+                                    <>
+                                        <div className="flex justify-between items-end mb-2">
+                                            <span className="text-3xl font-black text-primary">{progress}<span className="text-gray-300 text-xl">/6</span></span>
+                                            <span className="text-sm font-bold text-gray-500">{progress >= 6 ? "Tercapai!" : `${6 - progress} risol lagi`}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden mb-4">
+                                            <div
+                                                className="h-full bg-gradient-to-r from-primary to-primary-dark rounded-full transition-all duration-1000"
+                                                style={{ width: `${pct}%` }}
+                                            />
+                                        </div>
+                                        <div className="space-y-2 mb-4">
+                                            <div className="flex justify-between text-xs">
+                                                <span className="text-gray-500">Total terjual:</span>
+                                                <span className="font-bold">{afilData.totalSold} risol</span>
+                                            </div>
+                                            <div className="flex justify-between text-xs">
+                                                <span className="text-gray-500">Hadiah diklaim:</span>
+                                                <span className="font-bold">{afilData.claimedCount || 0} risol</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-gray-600 text-center italic">
+                                            {readyToClaim > 0
+                                                ? `🎉 Selamat! Kamu punya ${readyToClaim} risol gratis yang bisa diklaim.`
+                                                : "Ayo terus bagikan kodemu dan kumpulkan poinnya!"}
+                                        </p>
 
-                            {count >= 5 && !afilData.rewardClaimed && (
-                                <a
-                                    href={waLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn-primary w-full mt-6 text-center text-sm"
-                                >
-                                    🎁 Klaim Reward Sekarang
-                                </a>
-                            )}
+                                        {readyToClaim > 0 && (
+                                            <a
+                                                href={buildRewardClaimLink(afilData.ownerName, afilCode || "")}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn-primary w-full mt-6 text-center text-sm animate-bounce-subtle"
+                                            >
+                                                🎁 Klaim {readyToClaim} Risol Sekarang
+                                            </a>
+                                        )}
+                                    </>
+                                );
+                            })()}
                         </div>
                     </div>
 

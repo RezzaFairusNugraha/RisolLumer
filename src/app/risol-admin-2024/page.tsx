@@ -159,8 +159,8 @@ export default function AdminPage() {
         }
     };
 
-    const handleUpdateReward = async (code: string, claimed: boolean) => {
-        await updateAffiliateReward(code, claimed);
+    const handleUpdateReward = async (code: string, claimedCount: number) => {
+        await updateAffiliateReward(code, claimedCount);
         await loadData();
     };
 
@@ -586,55 +586,61 @@ export default function AdminPage() {
                                         </tr>
                                     ) : (
                                         Object.entries(affiliates).map(([code, data]: [string, any]) => {
-                                            const count = data.totalSold || 0;
-                                            const canClaim = count >= 5;
+                                            const totalSold = data.totalSold || 0;
+                                            const totalRewards = Math.floor(totalSold / 6);
+                                            const readyToClaim = Math.max(0, totalRewards - (data.claimedCount || 0));
+                                            
                                             return (
-                                                <tr key={code} className="hover:bg-gray-50 transition-colors">
+                                                <tr key={code} className="hover:bg-gray-50 transition-colors border-b border-gray-50">
                                                     <td className="px-6 py-4 font-black text-primary tracking-widest">{code}</td>
                                                     <td className="px-6 py-4 font-medium">{data.ownerName}</td>
-                                                    <td className="px-6 py-4 text-gray-600">{data.ownerWA}</td>
+                                                    <td className="px-6 py-4 text-gray-600 text-xs">{data.ownerWA}</td>
                                                     <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`font-bold ${canClaim ? 'text-green-600' : 'text-gray-400'}`}>
-                                                                {count}/5
-                                                            </span>
-                                                            <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                                <div
-                                                                    className={`h-full transition-all duration-500 ${canClaim ? 'bg-green-500' : 'bg-gray-300'}`}
-                                                                    style={{ width: `${Math.min((count / 5) * 100, 100)}%` }}
+                                                        <div className="flex flex-col">
+                                                            <span className="font-bold text-gray-800">{totalSold} risol</span>
+                                                            <div className="w-16 h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
+                                                                <div 
+                                                                    className="h-full bg-primary" 
+                                                                    style={{ width: `${(totalSold % 6) / 6 * 100}%` }}
                                                                 />
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        {data.rewardClaimed ? (
-                                                            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-black uppercase">
-                                                                SUDAH DIKLAIM ✅
+                                                        <div className="flex flex-col gap-1">
+                                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full w-fit ${readyToClaim > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                                                                {readyToClaim} SIAP KLAIM
                                                             </span>
-                                                        ) : (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${canClaim ? 'bg-yellow-100 text-yellow-700 animate-pulse' : 'bg-gray-100 text-gray-400'}`}>
-                                                                    {canClaim ? 'BELUM DIKLAIM 🎁' : 'BELUM CAPAI TARGET'}
-                                                                </span>
-                                                                {canClaim && (
-                                                                    <button
-                                                                        onClick={() => handleUpdateReward(code, true)}
-                                                                        className="text-[10px] bg-primary text-white font-bold py-1 px-3 rounded-lg hover:bg-primary-dark transition-colors"
-                                                                    >
-                                                                        Tandai Klaim
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        )}
+                                                            <span className="text-[10px] text-gray-500">
+                                                                Total Klaim: {data.claimedCount || 0}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <button
-                                                            onClick={() => handleDeleteAffiliate(code)}
-                                                            className="text-red-500 hover:text-red-700 p-2 rounded-xl hover:bg-red-50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                                                            title="Hapus Affiliate"
-                                                        >
-                                                            🗑️
-                                                        </button>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                disabled={readyToClaim <= 0}
+                                                                onClick={async () => {
+                                                                    if (confirm(`Proses klaim 1 hadiah untuk ${data.ownerName}?`)) {
+                                                                        await handleUpdateReward(code, (data.claimedCount || 0) + 1);
+                                                                    }
+                                                                }}
+                                                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all ${
+                                                                    readyToClaim > 0 
+                                                                    ? 'bg-primary text-white shadow-sm' 
+                                                                    : 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                                                                }`}
+                                                            >
+                                                                🎁 KLAIM 1
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDeleteAffiliate(code)}
+                                                                className="text-red-300 hover:text-red-500 p-2"
+                                                                title="Hapus Affiliate"
+                                                            >
+                                                                🗑️
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             );

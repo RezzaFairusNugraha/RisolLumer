@@ -120,7 +120,7 @@ export default function OrderPage() {
                     ownerWA: form.whatsapp,
                     usedBy: [],
                     totalSold: 0,
-                    rewardClaimed: false,
+                    claimedCount: 0,
                 });
             }
         }

@@ -11,8 +11,8 @@ export default function AfiliasiPage() {
     const [code, setCode] = useState("");
     const [result, setResult] = useState<{
         ownerName: string;
-        count: number;
-        rewardClaimed: boolean;
+        totalSold: number;
+        claimedCount: number;
     } | null>(null);
     const [notFound, setNotFound] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
@@ -34,9 +34,12 @@ export default function AfiliasiPage() {
             return;
         }
         setNotFound(false);
-        const count = aff.usedBy.length;
-        setResult({ ownerName: aff.ownerName, count, rewardClaimed: aff.rewardClaimed });
-        setShowConfetti(count >= 6);
+        setResult({ 
+            ownerName: aff.ownerName, 
+            totalSold: aff.totalSold, 
+            claimedCount: aff.claimedCount 
+        });
+        setShowConfetti(aff.totalSold >= 6);
     };
 
     const handleSearchByWA = async () => {
@@ -60,7 +63,12 @@ export default function AfiliasiPage() {
         }
     };
 
-    const pct = result ? Math.min((result.count / 6) * 100, 100) : 0;
+    const totalEarned = result ? Math.floor(result.totalSold / 6) : 0;
+    const readyToClaim = result ? Math.max(0, totalEarned - result.claimedCount) : 0;
+    const nextMilestone = result ? (Math.floor(result.totalSold / 6) + 1) * 6 : 6;
+    const progressInMilestone = result ? result.totalSold % 6 : 0;
+    const pct = (progressInMilestone / 6) * 100;
+    
     const waLink = result ? buildRewardClaimLink(result.ownerName, code.toUpperCase()) : "#";
 
     return (
@@ -164,69 +172,77 @@ export default function AfiliasiPage() {
                 {result && (
                     <div className="card p-6 animate-fade-in">
                         {/* Congrats or progress */}
-                        {result.count >= 6 ? (
-                            <div className="text-center mb-6">
-                                <div className="text-6xl mb-3">🎉</div>
-                                <h2 className="text-2xl font-black text-primary mb-2">Selamat, {result.ownerName}!</h2>
-                                <p className="text-gray-700 font-medium">
-                                    Kamu berhasil mengumpulkan 6 poin! Hubungi admin untuk klaim hadiahmu 🎁
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center mb-2">
-                                    <h2 className="text-lg font-black text-gray-800">Halo, {result.ownerName}! 👋</h2>
-                                    <span className="text-2xl font-black text-primary">{result.count}/6</span>
-                                </div>
-                                <p className="text-gray-600 text-sm mb-4">
-                                    {result.count} dari 6 risol sudah terjual pakai kodemu!
-                                </p>
-                            </div>
-                        )}
+                        <div className="mb-6">
+                            <h2 className="text-xl font-black text-gray-800 mb-1">Halo, {result.ownerName}! 👋</h2>
+                            <p className="text-gray-500 text-sm">Berikut adalah pencapaian afiliasi kamu:</p>
+                        </div>
 
-                        {/* Progress bar */}
-                        <div className="mb-4">
-                            <div className="w-full bg-gray-100 rounded-full h-5 overflow-hidden">
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                                <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Total Terjual</p>
+                                <p className="text-2xl font-black text-gray-800">{result.totalSold} <span className="text-xs font-normal text-gray-500">risol</span></p>
+                            </div>
+                            <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                                <p className="text-[10px] uppercase font-bold text-primary mb-1">Hadiah Siap Klaim</p>
+                                <p className="text-2xl font-black text-primary">{readyToClaim} <span className="text-xs font-normal text-primary/60">risol</span></p>
+                            </div>
+                        </div>
+
+                        {/* Progress Bar for Next Reward */}
+                        <div className="mb-6 bg-white border border-gray-100 p-4 rounded-2xl shadow-sm">
+                            <div className="flex justify-between items-end mb-2">
+                                <p className="text-xs font-bold text-gray-600">Progress Hadiah Berikutnya</p>
+                                <p className="text-sm font-black text-primary">{progressInMilestone}/6</p>
+                            </div>
+                            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
                                 <div
                                     className="h-full bg-gradient-to-r from-primary to-primary-dark rounded-full transition-all duration-700"
                                     style={{ width: `${pct}%` }}
                                 />
                             </div>
-                            <div className="flex justify-between text-xs text-gray-500 mt-1 px-1">
-                                <span>0</span>
-                                <span>6 risol</span>
+                            <p className="text-[10px] text-gray-400 mt-2 text-center italic">
+                                Jual {6 - progressInMilestone} risol lagi untuk dapet 1 risol gratis tambahan!
+                            </p>
+                        </div>
+
+                        {/* History Stats */}
+                        <div className="space-y-2 mb-6">
+                            <div className="flex justify-between text-xs px-2">
+                                <span className="text-gray-500">Total hadiah didapat:</span>
+                                <span className="font-bold text-gray-800">{totalEarned} risol</span>
+                            </div>
+                            <div className="flex justify-between text-xs px-2">
+                                <span className="text-gray-500">Sudah diklaim:</span>
+                                <span className="font-bold text-gray-800">{result.claimedCount} risol</span>
                             </div>
                         </div>
 
-                        {/* Motivasi */}
-                        <div className={`rounded-2xl p-4 text-center ${result.count >= 6 ? "bg-primary/10" : "bg-yellow-50"}`}>
-                            {result.count >= 6 ? (
-                                <>
-                                    <p className="font-bold text-primary">
-                                        ✨ Reward kamu sudah siap diklaim!
-                                    </p>
-                                    {result.rewardClaimed && (
-                                        <p className="text-xs text-gray-500 mt-1">Reward sudah diklaim</p>
-                                    )}
-                                </>
-                            ) : (
-                                <p className="font-bold text-yellow-700">
-                                    🔥 Tinggal {6 - result.count} risol lagi, kamu dapat 1 risol gratis!
-                                </p>
-                            )}
-                        </div>
+
 
                         {/* CTA klaim reward */}
-                        {result.count >= 6 && !result.rewardClaimed && (
-                            <a
-                                id="claim-reward-btn"
-                                href={waLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn-primary flex items-center justify-center gap-2 w-full mt-5"
-                            >
-                                💬 Klaim Reward via WhatsApp
-                            </a>
+                        {readyToClaim > 0 && (
+                            <div className="animate-bounce-subtle">
+                                <a
+                                    id="claim-reward-btn"
+                                    href={waLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn-primary flex items-center justify-center gap-2 w-full mt-2"
+                                >
+                                    💬 Klaim {readyToClaim} Risol Gratis via WhatsApp
+                                </a>
+                                <p className="text-[10px] text-center text-gray-400 mt-2 italic">
+                                    Admin akan memverifikasi data sebelum memberikan hadiah.
+                                </p>
+                            </div>
+                        )}
+                        
+                        {readyToClaim === 0 && totalEarned > 0 && (
+                            <div className="bg-green-50 border border-green-100 p-4 rounded-2xl text-center">
+                                <p className="text-xs font-bold text-green-700">✅ Semua hadiah sudah diklaim!</p>
+                                <p className="text-[10px] text-green-600 mt-1">Terus bagikan kodemu untuk dapat hadiah lagi.</p>
+                            </div>
                         )}
                     </div>
                 )}

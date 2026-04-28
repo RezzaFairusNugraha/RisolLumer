@@ -54,7 +54,7 @@ model Affiliate {
   ownerWA       String
   usedBy        String[] @default([])
   totalSold     Int      @default(0)
-  rewardClaimed Boolean  @default(false)
+  claimedCount  Int      @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

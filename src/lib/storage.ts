@@ -27,7 +27,7 @@ export interface AffiliateData {
     ownerWA: string;
     usedBy: string[]; // array of unique WA numbers that used this code
     totalSold: number;
-    rewardClaimed: boolean;
+    claimedCount: number;
 }
 
 export type AffiliatesStore = Record<string, AffiliateData>;
@@ -133,11 +133,11 @@ export async function findAffiliateByWA(wa: string): Promise<string | null> {
     return entry ? entry[0] : null;
 }
 
-export async function updateAffiliateReward(code: string, claimed: boolean): Promise<void> {
+export async function updateAffiliateReward(code: string, claimedCount: number): Promise<void> {
     try {
         const aff = await getAffiliate(code);
         if (aff) {
-            await saveAffiliate(code, { ...aff, rewardClaimed: claimed });
+            await saveAffiliate(code, { ...aff, claimedCount });
         }
     } catch (err) {
         console.error("updateAffiliateReward error:", err);
