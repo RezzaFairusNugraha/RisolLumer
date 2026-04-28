@@ -15,7 +15,7 @@ export async function POST() {
                         price1: p.price1,
                         price3: p.price3,
                         isMentah: !!p.isMentah,
-                    },
+                    } as any,
                     create: {
                         slug: p.id,
                         name: p.name,
@@ -25,7 +25,7 @@ export async function POST() {
                         price3: p.price3,
                         isMentah: !!p.isMentah,
                         isAvailable: true,
-                    },
+                    } as any,
                 })
             )
         );

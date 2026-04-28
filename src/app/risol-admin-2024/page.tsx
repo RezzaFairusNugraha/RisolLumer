@@ -24,6 +24,7 @@ type FilterType = "semua" | "ambil" | "antar";
 type FilterTime = "today" | "all";
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
+    Draft: "bg-gray-100 text-gray-500",
     Baru: "bg-yellow-100 text-yellow-800",
     Diproses: "bg-blue-100 text-blue-800",
     Selesai: "bg-green-100 text-green-800",
@@ -31,6 +32,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 };
 
 const ROW_COLORS: Record<OrderStatus, string> = {
+    Draft: "bg-white opacity-50",
     Baru: "bg-yellow-50",
     Diproses: "bg-blue-50",
     Selesai: "bg-green-50",
