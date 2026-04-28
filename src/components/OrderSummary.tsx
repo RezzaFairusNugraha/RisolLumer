@@ -102,7 +102,7 @@ export default function OrderSummary({ order, affiliateCode, onClose }: OrderSum
                             <p className="text-xs font-bold text-yellow-700 mb-1">🎉 Kamu dapat Kode Afiliasi!</p>
                             <p className="text-2xl font-black text-yellow-600 tracking-widest">{affiliateCode}</p>
                             <p className="text-xs text-yellow-600 mt-1">
-                                Bagikan ke teman-temanmu. Tiap 5 risol yang terjual pakai kodemu, kamu dapat 1 risol gratis!
+                                Bagikan ke teman-temanmu. Tiap 6 risol yang terjual pakai kodemu, kamu dapat 1 risol gratis!
                             </p>
                         </div>
                     )}

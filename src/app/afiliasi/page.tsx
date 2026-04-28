@@ -36,7 +36,7 @@ export default function AfiliasiPage() {
         setNotFound(false);
         const count = aff.usedBy.length;
         setResult({ ownerName: aff.ownerName, count, rewardClaimed: aff.rewardClaimed });
-        setShowConfetti(count >= 5);
+        setShowConfetti(count >= 6);
     };
 
     const handleSearchByWA = async () => {
@@ -60,7 +60,7 @@ export default function AfiliasiPage() {
         }
     };
 
-    const pct = result ? Math.min((result.count / 5) * 100, 100) : 0;
+    const pct = result ? Math.min((result.count / 6) * 100, 100) : 0;
     const waLink = result ? buildRewardClaimLink(result.ownerName, code.toUpperCase()) : "#";
 
     return (
@@ -83,7 +83,7 @@ export default function AfiliasiPage() {
                 <div className="text-center mb-10">
                     <h1 className="text-3xl sm:text-4xl font-black text-gray-800 mb-2">Program Afiliasi 🎁</h1>
                     <p className="text-gray-600">
-                        Setiap <strong>5 risol</strong> yang terjual pakai kodemu, kamu dapat <strong>1 risol gratis!</strong>
+                        Setiap <strong>6 risol</strong> yang terjual pakai kodemu, kamu dapat <strong>1 risol gratis!</strong>
                     </p>
                 </div>
 
@@ -164,22 +164,22 @@ export default function AfiliasiPage() {
                 {result && (
                     <div className="card p-6 animate-fade-in">
                         {/* Congrats or progress */}
-                        {result.count >= 5 ? (
+                        {result.count >= 6 ? (
                             <div className="text-center mb-6">
                                 <div className="text-6xl mb-3">🎉</div>
                                 <h2 className="text-2xl font-black text-primary mb-2">Selamat, {result.ownerName}!</h2>
                                 <p className="text-gray-700 font-medium">
-                                    Kamu berhasil mengajak 5 teman! Hubungi admin untuk klaim hadiahmu 🎁
+                                    Kamu berhasil mengumpulkan 6 poin! Hubungi admin untuk klaim hadiahmu 🎁
                                 </p>
                             </div>
                         ) : (
                             <div className="mb-6">
                                 <div className="flex justify-between items-center mb-2">
                                     <h2 className="text-lg font-black text-gray-800">Halo, {result.ownerName}! 👋</h2>
-                                    <span className="text-2xl font-black text-primary">{result.count}/5</span>
+                                    <span className="text-2xl font-black text-primary">{result.count}/6</span>
                                 </div>
                                 <p className="text-gray-600 text-sm mb-4">
-                                    {result.count} dari 5 teman sudah order pakai kodemu!
+                                    {result.count} dari 6 risol sudah terjual pakai kodemu!
                                 </p>
                             </div>
                         )}
@@ -194,13 +194,13 @@ export default function AfiliasiPage() {
                             </div>
                             <div className="flex justify-between text-xs text-gray-500 mt-1 px-1">
                                 <span>0</span>
-                                <span>5 teman</span>
+                                <span>6 risol</span>
                             </div>
                         </div>
 
                         {/* Motivasi */}
-                        <div className={`rounded-2xl p-4 text-center ${result.count >= 5 ? "bg-primary/10" : "bg-yellow-50"}`}>
-                            {result.count >= 5 ? (
+                        <div className={`rounded-2xl p-4 text-center ${result.count >= 6 ? "bg-primary/10" : "bg-yellow-50"}`}>
+                            {result.count >= 6 ? (
                                 <>
                                     <p className="font-bold text-primary">
                                         ✨ Reward kamu sudah siap diklaim!
@@ -211,13 +211,13 @@ export default function AfiliasiPage() {
                                 </>
                             ) : (
                                 <p className="font-bold text-yellow-700">
-                                    🔥 Tinggal {5 - result.count} risol lagi, kamu dapat 1 risol gratis!
+                                    🔥 Tinggal {6 - result.count} risol lagi, kamu dapat 1 risol gratis!
                                 </p>
                             )}
                         </div>
 
                         {/* CTA klaim reward */}
-                        {result.count >= 5 && !result.rewardClaimed && (
+                        {result.count >= 6 && !result.rewardClaimed && (
                             <a
                                 id="claim-reward-btn"
                                 href={waLink}
@@ -249,7 +249,7 @@ export default function AfiliasiPage() {
                         </li>
                         <li className="flex gap-2">
                             <span className="text-primary font-bold">4.</span>
-                            <span>Jika sudah terkumpul 5 risol, kamu dapat <strong>1 risol gratis!</strong></span>
+                            <span>Jika sudah terkumpul 6 risol, kamu dapat <strong>1 risol gratis!</strong></span>
                         </li>
                     </ol>
                 </div>
